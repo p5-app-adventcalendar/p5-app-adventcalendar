@@ -3,6 +3,10 @@ use strict;
 use warnings;
 our $VERSION = '0.01';
 
+sub handler {
+    return [ 200, [ 'Content-Type' => 'text/html' ], [ 'hello' ] ];
+}
+
 1;
 __END__
 
