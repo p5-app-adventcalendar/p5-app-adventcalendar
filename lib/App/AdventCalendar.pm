@@ -4,6 +4,8 @@ use warnings;
 our $VERSION = '0.01';
 
 use Plack::Request;
+use Text::Xslate;
+use Path::Class;
 
 sub handler {
     my $env = shift;
@@ -12,9 +14,26 @@ sub handler {
     if ( $req->path_info =~ qr{^/(\d{4})/([a-zA-Z0-9_-]+?)/$} ) {
         my $year = $1;
         my $name = $2;
-        return [ 200, [ 'Content-Type' => 'text/html' ], [ 'hello' ] ];
+        my $root = dir( 'assets', $year, $name, 'tmpl' );
+        return not_found() unless -d $root;
+
+        my $tx = Text::Xslate->new(
+            syntax    => 'TTerse',
+            path      => [ $root ],
+            cache_dir => '/tmp/app-adventecalendar',
+            cache     => 1,
+        );
+        return [
+            200,
+            [ 'Content-Type' => 'text/html' ],
+            [ $tx->render( 'index.html', { year => $year, name => $name } ) ]
+        ];
     }
 
+    return not_found();
+}
+
+sub not_found {
     return [ 404, [ 'Content-Type' => 'text/html' ], [ 'Not Found' ] ];
 }
 
