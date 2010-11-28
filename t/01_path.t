@@ -11,7 +11,17 @@ test_psgi $app, sub {
     my $req = HTTP::Request->new(GET => 'http://localhost/2010/sample/');
     my $res = $cb->($req);
 
-    is $res->code, 200, 'success case';
+    is $res->code, 200, 'success case for list';
+
+    $req = HTTP::Request->new(GET => 'http://localhost/2010/sample/1');
+    $res = $cb->($req);
+
+    is $res->code, 200, 'success case for entry';
+
+    $req = HTTP::Request->new(GET => 'http://localhost/2010/sample/2');
+    $res = $cb->($req);
+
+    is $res->code, 404, 'entry file not found';
 
     $req = HTTP::Request->new(GET => 'http://localhost/2010/example/');
     $res = $cb->($req);

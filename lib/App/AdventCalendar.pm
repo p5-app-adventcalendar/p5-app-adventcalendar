@@ -4,10 +4,11 @@ use warnings;
 our $VERSION = '0.01';
 
 use Router::Simple;
-use Text::Xslate;
+use Text::Xslate qw/mark_raw/;
 use Path::Class;
 use Time::Piece;
 use Time::Seconds;
+use Text::Xatena;
 
 sub handler {
     my $env = shift;
@@ -15,21 +16,46 @@ sub handler {
     my $router = Router::Simple->new();
     $router->connect(
         '/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/',
-        { controller => 'Calendar', action => 'list' }
+        { controller => 'Calendar', action => 'index' }
+    );
+    $router->connect(
+        '/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/{day:\d{1,2}}',
+        { controller => 'Calendar', action => 'entry' }
     );
 
     if ( my $p = $router->match($env) ) {
         my $root = dir( 'assets', $p->{year}, $p->{name} );
         return not_found() unless -d $root;
 
-        my $t = Time::Piece->strptime( "$p->{year}/12/01", '%Y/%m/%d' );
-        my @entries;
-        while ( $t->year <= $p->{year} ) {
-            push @entries, {
-                date   => Time::Piece->new($t),
-                exists => -e $root->file( $t->ymd . '.txt' ) ? 1 : 0,
-            };
-            $t += ONE_DAY;
+        my $vars = { %$p };
+
+        if ( $p->{action} eq 'index' ) {
+            my $t = Time::Piece->strptime( "$p->{year}/12/01", '%Y/%m/%d' );
+            my @entries;
+            while ( $t->year <= $p->{year} ) {
+                push @entries, {
+                    date   => Time::Piece->new($t),
+                    exists => -e $root->file( $t->ymd . '.txt' ) ? 1 : 0,
+                };
+                $t += ONE_DAY;
+            }
+            $vars->{entries} = \@entries;
+        }
+        elsif ( $p->{action} eq 'entry' ) {
+            my $t = Time::Piece->strptime(
+                    "$p->{year}/12/@{[sprintf('%02d',$p->{day})]}", '%Y/%m/%d' );
+                my $file = $root->file($t->ymd . '.txt');
+
+            if ( -e $file ) {
+                my $text = $file->slurp();
+                my ($title, $body) = split("\n\n", $text, 2);
+                $vars->{title} = $title;
+                my $xatena = Text::Xatena->new;
+                $vars->{text} = mark_raw($xatena->format($body));
+            }
+            else {
+                return not_found();
+            }
         }
 
         my $tx = Text::Xslate->new(
@@ -41,7 +67,7 @@ sub handler {
         return [
             200,
             [ 'Content-Type' => 'text/html' ],
-            [ $tx->render( 'index.html', { entries => \@entries, %$p } ) ]
+            [ $tx->render( "$p->{action}.html", $vars ) ]
         ];
     }
     else {
