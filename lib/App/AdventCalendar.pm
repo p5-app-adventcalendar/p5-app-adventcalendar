@@ -3,8 +3,19 @@ use strict;
 use warnings;
 our $VERSION = '0.01';
 
+use Plack::Request;
+
 sub handler {
-    return [ 200, [ 'Content-Type' => 'text/html' ], [ 'hello' ] ];
+    my $env = shift;
+
+    my $req = Plack::Request->new($env);
+    if ( $req->path_info =~ qr{^/(\d{4})/([a-zA-Z0-9_-]+?)/$} ) {
+        my $year = $1;
+        my $name = $2;
+        return [ 200, [ 'Content-Type' => 'text/html' ], [ 'hello' ] ];
+    }
+
+    return [ 404, [ 'Content-Type' => 'text/html' ], [ 'Not Found' ] ];
 }
 
 1;
