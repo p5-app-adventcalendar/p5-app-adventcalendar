@@ -4,5 +4,15 @@
   </head>
   <body>
     <h1>[% year %] advent calendar [% name %]</h1>
+
+    <ul>
+    [% FOR entry IN entries %]
+      [% IF entry.exists %]
+        <li><a href="[% entry.date.mday %]">[% entry.date.ymd %]</a></li>
+      [% ELSE %]
+        <li>[% entry.date.ymd %]</li>
+      [% END %]
+    [% END %]
+    </ul>
   </body>
 </html>
