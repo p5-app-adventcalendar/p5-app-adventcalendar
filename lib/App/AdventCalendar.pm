@@ -72,8 +72,8 @@ sub handler {
         }
         elsif ( $p->{action} eq 'track_list' ) {
         }
-        elsif ( $p->{action} eq 'pull' ) {
-            system("git pull origin master");
+        elsif ( $p->{action} eq 'pull' && $ENV{ADVENT_CALENDAR_PULL_COMMAND} ) {
+            system($ENV{ADVENT_CALENDAR_PULL_COMMAND});
             return [200, [], ['OK']];
         }
 
