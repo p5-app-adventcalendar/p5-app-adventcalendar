@@ -31,6 +31,8 @@ $router->connect(
     { controller => 'Calendar', action => 'entry' }
 );
 
+my %xslate;
+
 sub handler {
     my $env = shift;
 
@@ -76,22 +78,24 @@ sub handler {
             system($ENV{ADVENT_CALENDAR_PULL_COMMAND});
             return [200, [], ['OK']];
         }
-
-        my $tx = Text::Xslate->new(
-            syntax    => 'TTerse',
-            path      => [$root->subdir('tmpl'), dir('assets','tmpl')],
-            cache_dir => '/tmp/app-adventcalendar',
-            cache     => 1,
-            function  => {
-                uri_for => sub {
-                    my($path, $args) = @_;
-                    my $uri = $req->base;
-                    $uri->path($uri->path . $path);
-                    $uri->query_form(@$args) if $args;
-                    $uri;
+        my $tx = $xslate{$root} ||= do {
+            my $base = $req->base;
+            Text::Xslate->new(
+                syntax    => 'TTerse',
+                path      => [$root->subdir('tmpl'), dir('assets','tmpl')],
+                cache_dir => '/tmp/app-adventcalendar',
+                cache     => 1,
+                function  => {
+                    uri_for => sub {
+                        my($path, $args) = @_;
+                        my $uri = $base->clone;
+                        $uri->path($uri->path . $path);
+                        $uri->query_form(@$args) if $args;
+                        $uri;
+                    },
                 },
-            },
-        );
+            );
+        };
         return [
             200,
             [ 'Content-Type' => 'text/html' ],
