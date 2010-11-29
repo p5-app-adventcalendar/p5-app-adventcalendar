@@ -6,6 +6,7 @@ requires 'Router::Simple';
 requires 'Text::Xslate';
 requires 'Text::Xatena';
 requires 'Time::Piece';
+requires 'Plack';
 
 tests 't/*.t';
 author_tests 'xt';
