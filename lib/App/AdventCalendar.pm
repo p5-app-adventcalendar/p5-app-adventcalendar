@@ -12,6 +12,10 @@ use Text::Xatena;
 
 my $router = Router::Simple->new();
 $router->connect(
+    '/pull',
+    { controller => 'Calendar', action => 'pull' }
+);
+$router->connect(
     '/{year:\d{4}}/',
     { controller => 'Calendar', action => 'track_list' }
 );
@@ -63,6 +67,10 @@ sub handler {
         }
         elsif ( $p->{action} eq 'track_list' ) {
             $vars->{tracks} = [map { $_->dir_list(-1) } dir( 'assets', $p->{year} )->children(no_hidden => 1)];
+        }
+        elsif ( $p->{action} eq 'pull' ) {
+            system("git pull origin master");
+            return [200, [], ['OK']];
         }
 
         my $tx = Text::Xslate->new(
