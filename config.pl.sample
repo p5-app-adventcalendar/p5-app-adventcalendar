@@ -1,0 +1,4 @@
+{
+    title => 'JPerl Advent Calendar 2010',
+    assets_path => 'assets',
+};

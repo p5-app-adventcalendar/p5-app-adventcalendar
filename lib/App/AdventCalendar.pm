@@ -36,14 +36,16 @@ $router->connect(
 my %xslate;
 
 sub handler {
-    my $env = shift;
+    my ($env, $conf) = @_;
     if ( my $p = $router->match($env) ) {
-        my $root = dir( 'assets', $p->{year}, $p->{name} );
+        my $root = dir( $conf->{assets_path}, $p->{year}, $p->{name} );
         return not_found() unless -d $root;
 
         my $req  = Plack::Request->new($env);
         my $vars = { req => $req, %$p };
-        $vars->{tracks} = [map { $_->dir_list(-1) } dir( 'assets', $p->{year} )->children(no_hidden => 1)];
+        $vars->{conf} = $conf;
+        $vars->{tracks} = [ map { $_->dir_list(-1) }
+                dir( $conf->{assets_path}, $p->{year} )->children( no_hidden => 1 ) ];
 
         if ( $p->{action} eq 'index' ) {
             my $t = Time::Piece->strptime( "$p->{year}/12/01", '%Y/%m/%d' );
@@ -83,7 +85,7 @@ sub handler {
             my $base = $req->base;
             Text::Xslate->new(
                 syntax    => 'TTerse',
-                path      => [$root->subdir('tmpl'), dir('assets','tmpl')],
+                path      => [$root->subdir('tmpl'), dir($conf->{assets_path},'tmpl')],
                 cache_dir => '/tmp/app-adventcalendar',
                 cache     => 1,
                 function  => {
