@@ -1,20 +1,95 @@
-<html>
-  <head>
-    <title>[% year %] advent calendar [% name %]</title>
-  </head>
-  <body>
-    <h1>[% year %] advent calendar [% name %]</h1>
-
-    <ul>
-    [% FOR entry IN entries %]
-      [% IF entry.exists %]
-        <li><a href="[% entry.date.mday %]">[% entry.date.ymd %]</a></li>
-      [% ELSE %]
-        <li>[% entry.date.ymd %]</li>
-      [% END %]
-    [% END %]
-    </ul>
-
-    <div><a href="/[% year %]/">back to track list</a></div>
-  </body>
+<?xml version="1.0" encoding="UTF-8"?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja"> 
+<head profile="http://purl.org/net/ns/metaprof"> 
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+    <link rel="stylesheet" href="http://bulknews.typepad.com/test/styles.css" media="all" /> 
+    <title>[% name %] - advent calendar [% year %]</title> 
+<!--
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="http://perl-users.jp/articles/advent-calendar/2009/index.xml" /> 
+-->
+</head> 
+<body class="layout-two-column-right"> 
+<div id="container"> 
+    <div id="container-inner" class="pkg"> 
+ 
+        <div id="banner"> 
+            <div id="banner-inner" class="pkg"> 
+                <h1 id="banner-header">[% name %] - advent calendar [% year %]</h1> 
+                <p id="banner-description">Perl に関するちょっとした Tips をのっけてみるよ。ちゃんと続くかな？</p> 
+            </div> 
+        </div> 
+    </div> 
+ 
+    <div id="pagebody"> 
+        <div id="pagebody-inner"> 
+            <div id="alpha"> 
+                <div id="alpha-inner"> 
+ 
+                    <ul>
+                        [% FOR entry IN entries %]
+                            [% IF entry.exists %]
+                                <li><a href="[% uri_for(year _ '/' _ name _ '/' _ entry.date.mday) %]">[% entry.date.ymd %]</a></li>
+                            [% ELSE %]
+                                <li>[% entry.date.ymd %]</li>
+                            [% END %]
+                        [% END %]
+                    </ul>
+                    
+                    <style> 
+                        .description {
+                            margin-left: 10px;
+                            margin-right: 10px;
+                        }
+                    </style> 
+ 
+                </div> 
+            </div> 
+            <div id="beta"> 
+ 
+                <div class="module-feed module"> 
+                    <h2 class="module-header">Main Tracks</h2> 
+                    <div class="module-content"> 
+                        <ul> 
+                            [% FOR track IN tracks %]
+                                <li><a href="[% uri_for(year _ '/' _ track _ '/') %]">[% track %]</a></li>
+                            [% END %]
+                        </ul> 
+                    </div> 
+                </div> 
+ 
+                <div class="module-feed module"> 
+                    <h2 class="module-header">Yet Anthor Tracks</h2> 
+                    <div class="module-content"> 
+                        <ul> 
+                            <li>???</li>
+                        </ul> 
+                    </div> 
+                </div> 
+ 
+                <div class="module-elsewhere module"> 
+                    <h2 class="module-header">Other Sites</h2> 
+                    <div class="module-content"> 
+                        <ul> 
+                            <li><a href="http://www.perladvent.org/2009/">Perl Advent Calendar 2009</a></li> 
+                            <li><a href="http://perl6advent.wordpress.com/">Perl 6 Advent Calendar</a></li> 
+                            <li><a href="http://advent.plackperl.org/">Plack Advent Calendar</a></li> 
+                            <li><a href="http://www.catalystframework.org/calendar/2009/">Catalyst Advent Calendar</a></li> 
+                            <li><a href="http://opensource.kayac.com/ja/projects/ark/advent/2009/">Ark Advent Calendar 2009</a></li> 
+                            <li><a href="http://advent.rjbs.manxome.org/">RJBS Advent Calendar</a></li> 
+                        </ul> 
+                    </div> 
+                </div> 
+                <!-- powered by --> 
+                <div class="module-powered module"> 
+                    <div class="module-content"> 
+                        Powered by <a href="https://github.com/p5-app-adventcalendar/p5-app-adventcalendar/" title="p5-app-adventcalendar">p5-app-adventclendar</a> 
+                    </div> 
+                </div> 
+ 
+            </div> 
+        </div> 
+    </div> 
+</div> 
+</body> 
 </html>

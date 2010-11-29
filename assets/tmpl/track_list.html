@@ -1,12 +1,122 @@
-<html>
-  <head>
-    <title>[% year %] advent calendar</title>
-  </head>
-  <body>
-    <h1>[% year %] advent calendar</h1>
-
-    [% FOR track IN tracks %]
-      <a href="/[% year %]/[% track %]/">[% track %]</a>
-    [% END %]
-  </body>
+<?xml version="1.0" encoding="UTF-8"?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja"> 
+<head profile="http://purl.org/net/ns/metaprof"> 
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+    <link rel="stylesheet" href="http://bulknews.typepad.com/test/styles.css" media="all" /> 
+    <title>advent calendar [% year %]</title> 
+<!--
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="http://perl-users.jp/articles/advent-calendar/2009/index.xml" /> 
+-->
+</head> 
+<body class="layout-two-column-right"> 
+<div id="container"> 
+    <div id="container-inner" class="pkg"> 
+ 
+        <div id="banner"> 
+            <div id="banner-inner" class="pkg"> 
+                <h1 id="banner-header">advent calendar [% year %]</h1> 
+                <p id="banner-description">Perl に関するちょっとした Tips をのっけてみるよ。ちゃんと続くかな？</p> 
+            </div> 
+        </div> 
+    </div> 
+ 
+    <div id="pagebody"> 
+        <div id="pagebody-inner"> 
+            <div id="alpha"> 
+                <div id="alpha-inner"> 
+ 
+<p>今年もやってきました、JPerl Advent Calendar。12月1日から25日まで、1日1個ずつ tips を紹介していきます。</p> 
+<p>今年は三本だてです。はたして最後まで無事につづくのでしょうか。今年も無計画な上に面子がそろってないので、はらはらどきどきです ＞＜</p> 
+ 
+<h2>Main Tracks</h2> 
+ 
+<h3><a href="./hacker/">Hacker Track</a></h3> 
+<div class="description"> 
+    自分が書いたモジュールの解説や、ちょっとした tips などを紹介していきます。
+    (現在定員がうまってないのでメンバー募集中です!)
+</div> 
+<h3><a href="./casual/">Casual Track</a></h3> 
+<div class="description"> 
+    一日一個の CPAN モジュールを紹介します。
+</div> 
+ 
+ 
+<h2>Yet Another Tracks</h2> 
+ 
+<p>hacker/casual 以外の perl ネタを書きたい人が勝手に立ち上げるトラックです。</p> 
+ 
+<h3><a href="./dbix-skinny/">DBIx::Skinny Track</a></h3> 
+<div class="description"> 
+    一日一回 DBIx::Skinnyを紹介します。
+</div> 
+ 
+<h3><a href="./data-model/">Data::Model Track</a></h3> 
+<div class="description"> 
+    一日一回 Data::Model を紹介します。
+</div> 
+ 
+ 
+<h2>for writers</h2> 
+ 
+<p> 
+    <a href="./docs/how-to-commit.html">書き方はこちら</a> 
+</p> 
+ 
+<style> 
+    .description {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+</style> 
+ 
+                </div> 
+            </div> 
+            <div id="beta"> 
+ 
+                <div class="module-feed module"> 
+                    <h2 class="module-header">Main Tracks</h2> 
+                    <div class="module-content"> 
+                        <ul> 
+                            [% FOR track IN tracks %]
+                                <li><a href="[% uri_for(year _ '/' _ track _ '/') %]">[% track %]</a></li>
+                            [% END %]
+                        </ul> 
+                    </div> 
+                </div> 
+ 
+                <div class="module-feed module"> 
+                    <h2 class="module-header">Yet Anthor Tracks</h2> 
+                    <div class="module-content"> 
+                        <ul> 
+                            <li>???</li>
+                        </ul> 
+                    </div> 
+                </div> 
+ 
+                <div class="module-elsewhere module"> 
+                    <h2 class="module-header">Other Sites</h2> 
+                    <div class="module-content"> 
+                        <ul> 
+                            <li><a href="http://www.perladvent.org/2009/">Perl Advent Calendar 2009</a></li> 
+                            <li><a href="http://perl6advent.wordpress.com/">Perl 6 Advent Calendar</a></li> 
+                            <li><a href="http://advent.plackperl.org/">Plack Advent Calendar</a></li> 
+                            <li><a href="http://www.catalystframework.org/calendar/2009/">Catalyst Advent Calendar</a></li> 
+                            <li><a href="http://opensource.kayac.com/ja/projects/ark/advent/2009/">Ark Advent Calendar 2009</a></li> 
+                            <li><a href="http://advent.rjbs.manxome.org/">RJBS Advent Calendar</a></li> 
+                        </ul> 
+                    </div> 
+                </div> 
+                <!-- powered by --> 
+                <div class="module-powered module"> 
+                    <div class="module-content"> 
+                        Powered by <a href="https://github.com/p5-app-adventcalendar/p5-app-adventcalendar/" title="p5-app-adventcalendar">p5-app-adventclendar</a> 
+                    </div> 
+                </div> 
+ 
+            </div> 
+        </div> 
+    </div> 
+</div> 
+</body> 
 </html>

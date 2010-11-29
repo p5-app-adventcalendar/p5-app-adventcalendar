@@ -3,12 +3,14 @@ use strict;
 use warnings;
 our $VERSION = '0.01';
 
+use Plack::Request;
 use Router::Simple;
 use Text::Xslate qw/mark_raw/;
 use Path::Class;
 use Time::Piece;
 use Time::Seconds;
 use Text::Xatena;
+use Encode;
 
 my $router = Router::Simple->new();
 $router->connect(
@@ -35,7 +37,9 @@ sub handler {
         my $root = dir( 'assets', $p->{year}, $p->{name} );
         return not_found() unless -d $root;
 
-        my $vars = { %$p };
+        my $req  = Plack::Request->new($env);
+        my $vars = { req => $req, %$p };
+        $vars->{tracks} = [map { $_->dir_list(-1) } dir( 'assets', $p->{year} )->children(no_hidden => 1)];
 
         if ( $p->{action} eq 'index' ) {
             my $t = Time::Piece->strptime( "$p->{year}/12/01", '%Y/%m/%d' );
@@ -66,7 +70,6 @@ sub handler {
             }
         }
         elsif ( $p->{action} eq 'track_list' ) {
-            $vars->{tracks} = [map { $_->dir_list(-1) } dir( 'assets', $p->{year} )->children(no_hidden => 1)];
         }
         elsif ( $p->{action} eq 'pull' ) {
             system("git pull origin master");
@@ -78,11 +81,20 @@ sub handler {
             path      => [$root->subdir('tmpl'), dir('assets','tmpl')],
             cache_dir => '/tmp/app-adventcalendar',
             cache     => 1,
+            function  => {
+                uri_for => sub {
+                    my($path, $args) = @_;
+                    my $uri = $req->base;
+                    $uri->path($uri->path . $path);
+                    $uri->query_form(@$args) if $args;
+                    $uri;
+                },
+            },
         );
         return [
             200,
             [ 'Content-Type' => 'text/html' ],
-            [ $tx->render( "$p->{action}.html", $vars ) ]
+            [ encode('utf-8', $tx->render( "$p->{action}.html", $vars )) ]
         ];
     }
     else {
