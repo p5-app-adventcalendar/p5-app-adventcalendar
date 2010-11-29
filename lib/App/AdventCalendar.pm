@@ -15,6 +15,10 @@ sub handler {
 
     my $router = Router::Simple->new();
     $router->connect(
+        '/{year:\d{4}}/',
+        { controller => 'Calendar', action => 'track_list' }
+    );
+    $router->connect(
         '/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/',
         { controller => 'Calendar', action => 'index' }
     );
@@ -57,10 +61,13 @@ sub handler {
                 return not_found();
             }
         }
+        elsif ( $p->{action} eq 'track_list' ) {
+            $vars->{tracks} = [map { $_->dir_list(-1) } dir( 'assets', $p->{year} )->children(no_hidden => 1)];
+        }
 
         my $tx = Text::Xslate->new(
             syntax    => 'TTerse',
-            path      => [$root->subdir('tmpl')],
+            path      => [$root->subdir('tmpl'), dir('assets','tmpl')],
             cache_dir => '/tmp/app-adventecalendar',
             cache     => 1,
         );

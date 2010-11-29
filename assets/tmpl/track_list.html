@@ -1,0 +1,12 @@
+<html>
+  <head>
+    <title>[% year %] advent calendar</title>
+  </head>
+  <body>
+    <h1>[% year %] advent calendar</h1>
+
+    [% FOR track IN tracks %]
+      <a href="/[% year %]/[% track %]/">[% track %]</a>
+    [% END %]
+  </body>
+</html>
