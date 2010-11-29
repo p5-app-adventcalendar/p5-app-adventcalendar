@@ -99,7 +99,7 @@ sub handler {
         return [
             200,
             [ 'Content-Type' => 'text/html' ],
-            [ encode('utf-8', $tx->render( "$p->{action}.html", $vars )) ]
+            [ encode_utf8($tx->render( "$p->{action}.html", $vars )) ]
         ];
     }
     else {
