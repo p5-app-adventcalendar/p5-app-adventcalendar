@@ -10,22 +10,22 @@ use Time::Piece;
 use Time::Seconds;
 use Text::Xatena;
 
+my $router = Router::Simple->new();
+$router->connect(
+    '/{year:\d{4}}/',
+    { controller => 'Calendar', action => 'track_list' }
+);
+$router->connect(
+    '/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/',
+    { controller => 'Calendar', action => 'index' }
+);
+$router->connect(
+    '/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/{day:\d{1,2}}',
+    { controller => 'Calendar', action => 'entry' }
+);
+
 sub handler {
     my $env = shift;
-
-    my $router = Router::Simple->new();
-    $router->connect(
-        '/{year:\d{4}}/',
-        { controller => 'Calendar', action => 'track_list' }
-    );
-    $router->connect(
-        '/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/',
-        { controller => 'Calendar', action => 'index' }
-    );
-    $router->connect(
-        '/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/{day:\d{1,2}}',
-        { controller => 'Calendar', action => 'entry' }
-    );
 
     if ( my $p = $router->match($env) ) {
         my $root = dir( 'assets', $p->{year}, $p->{name} );
