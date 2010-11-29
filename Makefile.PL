@@ -2,6 +2,7 @@ use inc::Module::Install;
 name 'App-AdventCalendar';
 all_from 'lib/App/AdventCalendar.pm';
 
+requires 'Plack';
 requires 'Path::Class';
 requires 'Router::Simple';
 requires 'Text::Xslate';
