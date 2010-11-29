@@ -53,7 +53,7 @@
       [% text %]
     </div> 
     <div class="entry-meta"> 
-        <a rel="bookmark" href="[% req.uri.stringify %]">[% update_at %]</a> 
+        <a rel="bookmark" href="[% req.uri | uri %]">[% update_at %]</a> 
         &nbsp;|&nbsp;
         <a href="[% uri_for(year _ '/' _ name _ '/') %]">Index</a> 
     </div> 
