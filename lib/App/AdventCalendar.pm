@@ -32,7 +32,7 @@ sub handler {
         if ( $p->{action} eq 'index' ) {
             my $t = Time::Piece->strptime( "$p->{year}/12/01", '%Y/%m/%d' );
             my @entries;
-            while ( $t->year <= $p->{year} ) {
+            while ( $t->mday <= 25 ) {
                 push @entries, {
                     date   => Time::Piece->new($t),
                     exists => -e $root->file( $t->ymd . '.txt' ) ? 1 : 0,
