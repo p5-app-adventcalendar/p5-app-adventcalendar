@@ -68,7 +68,7 @@ sub handler {
         my $tx = Text::Xslate->new(
             syntax    => 'TTerse',
             path      => [$root->subdir('tmpl'), dir('assets','tmpl')],
-            cache_dir => '/tmp/app-adventecalendar',
+            cache_dir => '/tmp/app-adventcalendar',
             cache     => 1,
         );
         return [
