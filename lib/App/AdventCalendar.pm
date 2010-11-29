@@ -13,6 +13,8 @@ use Time::Seconds;
 use Text::Xatena;
 use Encode;
 
+eval { require File::Spec::Memoized };
+
 my $router = Router::Simple->new();
 $router->connect(
     '/pull',
@@ -35,7 +37,6 @@ my %xslate;
 
 sub handler {
     my $env = shift;
-
     if ( my $p = $router->match($env) ) {
         my $root = dir( 'assets', $p->{year}, $p->{name} );
         return not_found() unless -d $root;

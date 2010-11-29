@@ -2,10 +2,13 @@ use inc::Module::Install;
 name 'App-AdventCalendar';
 all_from 'lib/App/AdventCalendar.pm';
 
+requires 'Path::Class';
 requires 'Router::Simple';
 requires 'Text::Xslate';
 requires 'Text::Xatena';
 requires 'Time::Piece';
+
+recommends 'File::Spec::Memoized'; # for performance
 
 tests 't/*.t';
 author_tests 'xt';
