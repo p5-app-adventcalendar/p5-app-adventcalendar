@@ -1,4 +1,10 @@
+use utf8;
 {
     title => 'JPerl Advent Calendar 2010',
+    description => 'Perl に関するちょっとした Tips をのっけてみるよ。ちゃんと続くかな？',
     assets_path => 'assets',
+    links => [
+        { href => 'http://perl-users.jp/', label => 'perl-users.jp' },
+        { href => 'http://japan.perlassociation.org/', label => 'Japan Perl Association' },
+    ],
 };
