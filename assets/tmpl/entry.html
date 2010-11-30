@@ -52,7 +52,17 @@
     <div class="entry-content"> 
       [% text %]
     </div> 
+
     <div class="entry-meta"> 
+        <div id="disqus_thread"></div><script type="text/javascript"><!--
+        var disqus_url='[% req.uri %]';
+        var disqus_title='[% title %]';
+        //--></script> 
+        <script type="text/javascript" src="http://disqus.com/forums/jpac/embed.js"></script> 
+        <noscript><a href="http://jpac.disqus.com/?url=ref">View the discussion thread.</a></noscript> 
+        <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a> 
+        <br />
+
         <a rel="bookmark" href="[% req.uri | uri %]">[% update_at %]</a> 
         &nbsp;|&nbsp;
         <a href="[% uri_for(year _ '/' _ name _ '/') %]">Index</a> 
@@ -62,50 +72,8 @@
  
                 </div> 
             </div> 
-            <div id="beta"> 
- 
-                <div class="module-feed module"> 
-                    <h2 class="module-header">Main Tracks</h2> 
-                    <div class="module-content"> 
-                        <ul> 
-                            [% FOR track IN tracks %]
-                                <li><a href="[% uri_for(year _ '/' _ track _ '/') %]">[% track %]</a></li>
-                            [% END %]
-                        </ul> 
-                    </div> 
-                </div> 
- 
-                <div class="module-feed module"> 
-                    <h2 class="module-header">Yet Anthor Tracks</h2> 
-                    <div class="module-content"> 
-                        <ul> 
-                            <li>???</li>
-                        </ul> 
-                    </div> 
-                </div> 
- 
-                <div class="module-elsewhere module"> 
-                    <h2 class="module-header">Other Sites</h2> 
-                    <div class="module-content"> 
-                        <ul> 
-                            <li><a href="http://www.perladvent.org/2009/">Perl Advent Calendar 2009</a></li> 
-                            <li><a href="http://perl6advent.wordpress.com/">Perl 6 Advent Calendar</a></li> 
-                            <li><a href="http://advent.plackperl.org/">Plack Advent Calendar</a></li> 
-                            <li><a href="http://www.catalystframework.org/calendar/2009/">Catalyst Advent Calendar</a></li> 
-                            <li><a href="http://opensource.kayac.com/ja/projects/ark/advent/2009/">Ark Advent Calendar 2009</a></li> 
-                            <li><a href="http://advent.rjbs.manxome.org/">RJBS Advent Calendar</a></li> 
-                        </ul> 
-                    </div> 
-                </div> 
-                <!-- powered by --> 
-                <div class="module-powered module"> 
-                    <div class="module-content"> 
-                        Powered by <a href="https://github.com/p5-app-adventcalendar/p5-app-adventcalendar/" title="p5-app-adventcalendar">p5-app-adventclendar</a> 
-                    </div> 
-                </div> 
- 
-            </div> 
         </div> 
+        [% INCLUDE 'include/sidemenu.html' %]
     </div> 
 </div> 
 </body> 
