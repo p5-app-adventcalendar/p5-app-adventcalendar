@@ -46,10 +46,13 @@ sub handler {
             my $t = Time::Piece->strptime( "$p->{year}/12/01", '%Y/%m/%d' );
             my @entries;
             while ( $t->mday <= 25 ) {
-                push @entries, {
+                push @entries,
+                  {
                     date   => Time::Piece->new($t),
-                    exists => -e $root->file( $t->ymd . '.txt' ) ? 1 : 0,
-                };
+                    exists => ( -e $root->file( $t->ymd . '.txt' ) )
+                      && ( localtime->year > $p->{year}
+                        || $t->yday >= localtime->yday ) ? 1 : 0,
+                  };
                 $t += ONE_DAY;
             }
             $vars->{entries} = \@entries;
