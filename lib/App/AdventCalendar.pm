@@ -72,7 +72,7 @@ sub handler {
                 my $file = $root->file($t->ymd . '.txt');
 
             if ( -e $file ) {
-                my $text = $file->slurp();
+                my $text = $file->slurp(iomode => '<:utf8');
                 my ($title, $body) = split("\n\n", $text, 2);
                 $vars->{title} = $title;
                 my $xatena = Text::Xatena->new;
