@@ -56,8 +56,12 @@ sub handler {
                     date   => Time::Piece->new($t),
                     exists => ( -e $root->file( $t->ymd . '.txt' ) )
                       && ( localtime->year > $p->{year}
-                        || $t->yday >= localtime->yday ) ? 1 : 0,
+                        || $t->yday <= localtime->yday ) ? 1 : 0,
                   };
+                warn localtime->year;
+                warn localtime->yday;
+                warn $p->{year};
+                warn $t->yday;
                 $t += ONE_DAY;
             }
             $vars->{entries} = \@entries;
