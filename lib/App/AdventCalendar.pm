@@ -1,6 +1,7 @@
 package App::AdventCalendar;
 use strict;
 use warnings;
+use utf8;
 our $VERSION = '0.01';
 
 use Plack::Request;
@@ -11,6 +12,8 @@ use Time::Piece;
 use Time::Seconds;
 use Text::Xatena;
 use Encode;
+
+eval { require File::Spec::Memoized };
 
 my $router = Router::Simple->new();
 $router->connect(
@@ -30,25 +33,35 @@ $router->connect(
     { controller => 'Calendar', action => 'entry' }
 );
 
-sub handler {
-    my $env = shift;
+my %xslate;
 
+sub handler {
+    my ($env, $conf) = @_;
     if ( my $p = $router->match($env) ) {
-        my $root = dir( 'assets', $p->{year}, $p->{name} );
+        my $root = dir( $conf->{assets_path}, $p->{year}, $p->{name} );
         return not_found() unless -d $root;
 
         my $req  = Plack::Request->new($env);
         my $vars = { req => $req, %$p };
-        $vars->{tracks} = [map { $_->dir_list(-1) } dir( 'assets', $p->{year} )->children(no_hidden => 1)];
+        $vars->{conf} = $conf;
+        $vars->{tracks} = [ map { $_->dir_list(-1) } grep { $_->is_dir }
+                dir( $conf->{assets_path}, $p->{year} )->children( no_hidden => 1 ) ];
 
         if ( $p->{action} eq 'index' ) {
             my $t = Time::Piece->strptime( "$p->{year}/12/01", '%Y/%m/%d' );
             my @entries;
             while ( $t->mday <= 25 ) {
-                push @entries, {
+                push @entries,
+                  {
                     date   => Time::Piece->new($t),
-                    exists => -e $root->file( $t->ymd . '.txt' ) ? 1 : 0,
-                };
+                    exists => ( -e $root->file( $t->ymd . '.txt' ) )
+                      && ( localtime->year > $p->{year}
+                        || $t->yday <= localtime->yday ) ? 1 : 0,
+                  };
+                warn localtime->year;
+                warn localtime->yday;
+                warn $p->{year};
+                warn $t->yday;
                 $t += ONE_DAY;
             }
             $vars->{entries} = \@entries;
@@ -71,30 +84,32 @@ sub handler {
         }
         elsif ( $p->{action} eq 'track_list' ) {
         }
-        elsif ( $p->{action} eq 'pull' ) {
-            system("git pull origin master");
+        elsif ( $p->{action} eq 'pull' && $ENV{ADVENT_CALENDAR_PULL_COMMAND} ) {
+            system($ENV{ADVENT_CALENDAR_PULL_COMMAND});
             return [200, [], ['OK']];
         }
-
-        my $tx = Text::Xslate->new(
-            syntax    => 'TTerse',
-            path      => [$root->subdir('tmpl'), dir('assets','tmpl')],
-            cache_dir => '/tmp/app-adventcalendar',
-            cache     => 1,
-            function  => {
-                uri_for => sub {
-                    my($path, $args) = @_;
-                    my $uri = $req->base;
-                    $uri->path($uri->path . $path);
-                    $uri->query_form(@$args) if $args;
-                    $uri;
+        my $tx = $xslate{$root} ||= do {
+            my $base = $req->base;
+            Text::Xslate->new(
+                syntax    => 'TTerse',
+                path      => [$root->subdir('tmpl'), dir($conf->{assets_path},'tmpl')],
+                cache_dir => '/tmp/app-adventcalendar',
+                cache     => 1,
+                function  => {
+                    uri_for => sub {
+                        my($path, $args) = @_;
+                        my $uri = $base->clone;
+                        $uri->path($conf->{base_path} . $uri->path . $path);
+                        $uri->query_form(@$args) if $args;
+                        $uri;
+                    },
                 },
-            },
-        );
+            );
+        };
         return [
             200,
             [ 'Content-Type' => 'text/html' ],
-            [ encode('utf-8', $tx->render( "$p->{action}.html", $vars )) ]
+            [ encode_utf8($tx->render( "$p->{action}.html", $vars )) ]
         ];
     }
     else {
