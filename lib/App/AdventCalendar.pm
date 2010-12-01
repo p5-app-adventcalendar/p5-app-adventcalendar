@@ -11,6 +11,8 @@ use Path::Class;
 use Time::Piece;
 use Time::Seconds;
 use Text::Xatena;
+use Text::Xatena::Inline::Aggressive;
+use Cache::MemoryCache;
 use Encode;
 
 eval { require File::Spec::Memoized };
@@ -72,11 +74,18 @@ sub handler {
                 my $file = $root->file($t->ymd . '.txt');
 
             if ( -e $file ) {
-                my $text = $file->slurp(iomode => '<:utf8');
-                my ($title, $body) = split("\n\n", $text, 2);
+                my $text = $file->slurp( iomode => '<:utf8' );
+                my ( $title, $body ) = split( "\n\n", $text, 2 );
                 $vars->{title} = $title;
-                my $xatena = Text::Xatena->new;
-                $vars->{text} = mark_raw($xatena->format($body));
+                my $xatena = Text::Xatena->new( hatena_compatible => 1 );
+                $vars->{text} = mark_raw(
+                    $xatena->format(
+                        $body,
+                        Text::Xatena::Inline::Aggressive->new(
+                            cache => Cache::MemoryCache->new
+                        )
+                    )
+                );
             }
             else {
                 return not_found();
