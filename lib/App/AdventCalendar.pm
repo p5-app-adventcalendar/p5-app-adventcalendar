@@ -129,6 +129,7 @@ sub handler {
                     uri_for => sub {
                         my($path, $args) = @_;
                         my $uri = $base->clone;
+                        $path =~ s|^/||;
                         $uri->path($conf->{base_path} . $uri->path . $path);
                         $uri->query_form(@$args) if $args;
                         $uri;
