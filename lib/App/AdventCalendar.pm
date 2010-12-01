@@ -50,8 +50,9 @@ sub handler {
         my $req  = Plack::Request->new($env);
         my $vars = { req => $req, %$p };
         $vars->{conf} = $conf;
-        $vars->{tracks} = [ map { $_->dir_list(-1) } grep { $_->is_dir }
-                dir( $conf->{assets_path}, $p->{year} )->children( no_hidden => 1 ) ];
+        $vars->{tracks} = [ map { $_->dir_list(-1) } grep {
+            $_->is_dir and !$p->{year} ? $_ ne 'tmpl' : 1
+        } dir( $conf->{assets_path}, $p->{year} )->children( no_hidden => 1 ) ];
 
         if ( $p->{action} eq 'index' ) {
             my $t = Time::Piece->strptime( "$p->{year}/12/01", '%Y/%m/%d' );
