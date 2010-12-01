@@ -90,6 +90,7 @@ sub handler {
                         )
                     )
                 );
+                $vars->{update_at} = $t->cdate;
             }
             else {
                 return not_found();
