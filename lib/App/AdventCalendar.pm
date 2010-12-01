@@ -23,6 +23,10 @@ $router->connect(
     { controller => 'Calendar', action => 'pull' }
 );
 $router->connect(
+    '/help.html',
+    { controller => 'Calendar', action => 'help' }
+);
+$router->connect(
     '/{year:\d{4}}/',
     { controller => 'Calendar', action => 'track_list' }
 );
@@ -73,6 +77,26 @@ sub handler {
                     "$p->{year}/12/@{[sprintf('%02d',$p->{day})]}", '%Y/%m/%d' );
                 my $file = $root->file($t->ymd . '.txt');
 
+            if ( -e $file ) {
+                my $text = $file->slurp( iomode => '<:utf8' );
+                my ( $title, $body ) = split( "\n\n", $text, 2 );
+                $vars->{title} = $title;
+                my $xatena = Text::Xatena->new( hatena_compatible => 1 );
+                $vars->{text} = mark_raw(
+                    $xatena->format(
+                        $body,
+                        Text::Xatena::Inline::Aggressive->new(
+                            cache => Cache::MemoryCache->new
+                        )
+                    )
+                );
+            }
+            else {
+                return not_found();
+            }
+        }
+        elsif ( $p->{action} eq 'help' ) {
+            my $file = dir( $conf->{assets_path} )->file( 'help.txt' );
             if ( -e $file ) {
                 my $text = $file->slurp( iomode => '<:utf8' );
                 my ( $title, $body ) = split( "\n\n", $text, 2 );
