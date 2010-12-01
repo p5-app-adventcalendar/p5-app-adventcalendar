@@ -64,10 +64,6 @@ sub handler {
                       && ( localtime->year > $p->{year}
                         || $t->yday <= localtime->yday ) ? 1 : 0,
                   };
-                warn localtime->year;
-                warn localtime->yday;
-                warn $p->{year};
-                warn $t->yday;
                 $t += ONE_DAY;
             }
             $vars->{entries} = \@entries;
