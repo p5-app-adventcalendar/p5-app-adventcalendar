@@ -14,6 +14,7 @@ use Text::Xatena;
 use Text::Xatena::Inline::Aggressive;
 use Cache::MemoryCache;
 use Encode;
+use POSIX 'strftime';
 
 eval { require File::Spec::Memoized };
 
@@ -87,7 +88,7 @@ sub handler {
                         )
                     )
                 );
-                $vars->{update_at} = $t->cdate;
+                $vars->{update_at} = strftime '%c', localtime((stat($file))[9]);
             }
             else {
                 return not_found();
