@@ -27,7 +27,7 @@ $router->connect('/pull', {
     act  => sub {
         my ($root, $vars) = @_;
         system($ENV{ADVENT_CALENDAR_PULL_COMMAND});
-        return [200, [], ['OK']];
+        die [200, [], ['OK']];
     },
 });
 $router->connect('/help.html', {
@@ -43,7 +43,7 @@ $router->connect('/help.html', {
             $vars->{update_at} = $entry->{update_at};
         }
         else {
-            return not_found();
+            die not_found();
         }
     },
 });
@@ -128,7 +128,7 @@ $router->connect('/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/{day:\d{1,2}}', {
             $vars->{footnotes} = $entry->{footnotes};
         }
         else {
-            return not_found();
+            die not_found();
         }
     },
 });
