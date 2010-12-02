@@ -106,7 +106,7 @@ sub handler {
                         || $t->yday <= localtime->yday )) {
                     my $entry = parse_entry($file);
                     my $uri = URI->new;
-                    $uri->path($conf->{base_path} . '/' . $p->{name} . '/' . $t->mday);
+                    $uri->path($p->{name} . '/' . $t->mday);
                     $entry->{link} = $uri->as_string;
                     push @entries, $entry;
                 }
