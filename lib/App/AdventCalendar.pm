@@ -84,14 +84,32 @@ sub handler {
 
         if ( $p->{action} eq 'index' ) {
             my $t = Time::Piece->strptime( "$p->{year}/12/01", '%Y/%m/%d' );
+            my $cache = Cache::MemoryCache->new( { namespace => $p->{ name } } );
             my @entries;
             while ( $t->mday <= 25 ) {
+                my $title;
+                my $exists = ( -e $root->file( $t->ymd . '.txt' ) )
+                      && ( localtime->year > $p->{year}
+                        || $t->yday <= localtime->yday ) ? 1 : 0;
+
+                if ( $exists ) {
+                    my ( $cached_mtime, $cached_title ) = split/\t/, ( $cache->get( $t->mday ) || "0\t" );
+                    my $mtime = $root->file( $t->ymd . '.txt' )->stat->[9];
+                    if ( not $cached_title or $mtime > $cached_mtime ) {
+                        my $fh    = $root->file( $t->ymd . '.txt' )->open;
+                        $title = <$fh>; chomp($title);
+                        $cache->set( $t->mday => "$mtime\t$title", 'never' );
+                    }
+                    else {
+                        $title = $cached_title;
+                    }
+                }
+
                 push @entries,
                   {
                     date   => Time::Piece->new($t),
-                    exists => ( -e $root->file( $t->ymd . '.txt' ) )
-                      && ( localtime->year > $p->{year}
-                        || $t->yday <= localtime->yday ) ? 1 : 0,
+                    exists => $exists,,
+                    title  => $title,
                   };
                 $t += ONE_DAY;
             }
