@@ -36,7 +36,6 @@ $router->connect('/help.html', {
         my ($root, $vars) = @_;
         my $file = dir( $vars->{conf}->{assets_path} )->file( 'help.txt' );
         if ( -e $file ) {
-            my $xatena = Text::Xatena->new( hatena_compatible => 1 );
             my $entry = parse_entry($file);
             $vars->{title}     = $entry->{title};
             $vars->{text}      = $entry->{text};
