@@ -60,10 +60,12 @@ sub parse_entry {
             )
         )
     );
+    my @ftime = localtime((stat($file))[9]);
     return {
         title     => $title,
         text      => $text,
-        update_at => strftime '%c', localtime((stat($file))[9])
+        update_at => strftime('%c', @ftime),
+        pubdate   => strftime('%Y-%m-%dT%H:%M:%S%z', @ftime),
     }
 }
 
