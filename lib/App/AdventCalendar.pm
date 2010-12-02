@@ -11,7 +11,7 @@ use Path::Class;
 use Time::Piece;
 use Time::Seconds;
 use Text::Xatena;
-use Text::Xatena::Inline::Aggressive;
+use Text::Xatena::Inline;
 use Cache::MemoryCache;
 use Encode;
 use POSIX 'strftime';
@@ -125,6 +125,7 @@ $router->connect('/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/{day:\d{1,2}}', {
             $vars->{title}     = $entry->{title};
             $vars->{text}      = $entry->{text};
             $vars->{update_at} = $entry->{update_at};
+            $vars->{footnotes} = $entry->{footnotes};
         }
         else {
             return not_found();
@@ -139,12 +140,11 @@ sub parse_entry {
     my $text = $file->slurp( iomode => '<:utf8' );
     my ( $title, $body ) = split( "\n\n", $text, 2 );
     my $xatena = Text::Xatena->new( hatena_compatible => 1 );
+    my $inline = Text::Xatena::Inline->new;
     $text = mark_raw(
         $xatena->format(
             $body,
-            Text::Xatena::Inline::Aggressive->new(
-                cache => Cache::MemoryCache->new
-            )
+            inline => $inline
         )
     );
     my @ftime = localtime((stat($file))[9]);
@@ -153,6 +153,7 @@ sub parse_entry {
         text      => $text,
         update_at => strftime('%c', @ftime),
         pubdate   => strftime('%Y-%m-%dT%H:%M:%S', @ftime),
+        footnotes => $inline->footnotes,
     }
 }
 

@@ -53,6 +53,15 @@
       [% text %]
     </div> 
 
+    <div class="entry-notes">
+        [% FOR note IN footnotes %]
+        <div class="note" id="fn[% note.number %]">
+            *[% note.number %]:
+            [% note.note %]
+        </div>
+        [% END %]
+    </div>
+
     <div class="entry-meta"> 
         <div id="disqus_thread"></div><script type="text/javascript"><!--
         var disqus_url='[% req.uri %]';

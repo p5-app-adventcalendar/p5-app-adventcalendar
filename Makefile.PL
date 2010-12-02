@@ -5,7 +5,7 @@ all_from 'lib/App/AdventCalendar.pm';
 requires 'Plack';
 requires 'Path::Class';
 requires 'Router::Simple';
-requires 'Text::Xslate';
+requires 'Text::Xslate' => '0.05';
 requires 'Text::Xatena';
 requires 'Time::Piece';
 requires 'Plack';

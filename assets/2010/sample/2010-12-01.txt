@@ -12,3 +12,6 @@ you can use "hatena syntax".
 use strict;
 say 'hello';
 ||<
+
+You can [http://example.com:title=Link!] and append footnotes((foobar)).
+
