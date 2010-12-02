@@ -152,7 +152,7 @@ sub parse_entry {
         text      => $text,
         update_at => strftime('%c', @ftime),
         pubdate   => strftime('%Y-%m-%dT%H:%M:%S', @ftime),
-        footnotes => $inline->footnotes,
+        footnotes => ($inline->can('footnotes') ? $inline->footnotes : ()),
     }
 }
 
@@ -168,7 +168,7 @@ sub handler {
         $vars->{tracks} = [ map { $_->dir_list(-1) } grep {
             $_->is_dir and !$p->{year} ? $_->stringify !~ /tmpl/ : 1
         } dir( $conf->{assets_path}, $p->{year} )->children( no_hidden => 1 ) ];
-        
+
         eval { $p->{act}->($root, $vars) };
         if ($@) {
             if (ref($@) eq 'ARRAY') {
