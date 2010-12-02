@@ -36,11 +36,36 @@ $router->connect(
     { controller => 'Calendar', action => 'index' }
 );
 $router->connect(
+    '/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/rss',
+    { controller => 'Calendar', action => 'feed' }
+);
+$router->connect(
     '/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/{day:\d{1,2}}',
     { controller => 'Calendar', action => 'entry' }
 );
 
 my %xslate;
+
+sub parse_entry {
+    my $file = shift;
+
+    my $text = $file->slurp( iomode => '<:utf8' );
+    my ( $title, $body ) = split( "\n\n", $text, 2 );
+    my $xatena = Text::Xatena->new( hatena_compatible => 1 );
+    $text = mark_raw(
+        $xatena->format(
+            $body,
+            Text::Xatena::Inline::Aggressive->new(
+                cache => Cache::MemoryCache->new
+            )
+        )
+    );
+    return {
+        title     => $title,
+        text      => $text,
+        update_at => strftime '%c', localtime((stat($file))[9])
+    }
+}
 
 sub handler {
     my ($env, $conf) = @_;
@@ -70,25 +95,29 @@ sub handler {
             }
             $vars->{entries} = \@entries;
         }
+        elsif ( $p->{action} eq 'feed' ) {
+            my $t = Time::Piece->strptime( "$p->{year}/12/01", '%Y/%m/%d' );
+            my @entries;
+            while ( $t->mday <= 25 ) {
+                my $file = $root->file( $t->ymd . '.txt' );
+                if ( -e $file && ( localtime->year > $p->{year}
+                        || $t->yday <= localtime->yday )) {
+                    push @entries, parse_entry($file);
+                }
+                $t += ONE_DAY;
+            }
+            $vars->{entries} = \@entries;
+        }
         elsif ( $p->{action} eq 'entry' ) {
             my $t = Time::Piece->strptime(
                     "$p->{year}/12/@{[sprintf('%02d',$p->{day})]}", '%Y/%m/%d' );
-                my $file = $root->file($t->ymd . '.txt');
+            my $file = $root->file($t->ymd . '.txt');
 
             if ( -e $file ) {
-                my $text = $file->slurp( iomode => '<:utf8' );
-                my ( $title, $body ) = split( "\n\n", $text, 2 );
-                $vars->{title} = $title;
-                my $xatena = Text::Xatena->new( hatena_compatible => 1 );
-                $vars->{text} = mark_raw(
-                    $xatena->format(
-                        $body,
-                        Text::Xatena::Inline::Aggressive->new(
-                            cache => Cache::MemoryCache->new
-                        )
-                    )
-                );
-                $vars->{update_at} = strftime '%c', localtime((stat($file))[9]);
+                my $entry = parse_entry($file);
+                $vars->{title}     = $entry->{title};
+                $vars->{text}      = $entry->{text};
+                $vars->{update_at} = $entry->{update_at};
             }
             else {
                 return not_found();
@@ -97,18 +126,11 @@ sub handler {
         elsif ( $p->{action} eq 'help' ) {
             my $file = dir( $conf->{assets_path} )->file( 'help.txt' );
             if ( -e $file ) {
-                my $text = $file->slurp( iomode => '<:utf8' );
-                my ( $title, $body ) = split( "\n\n", $text, 2 );
-                $vars->{title} = $title;
                 my $xatena = Text::Xatena->new( hatena_compatible => 1 );
-                $vars->{text} = mark_raw(
-                    $xatena->format(
-                        $body,
-                        Text::Xatena::Inline::Aggressive->new(
-                            cache => Cache::MemoryCache->new
-                        )
-                    )
-                );
+                my $entry = parse_entry($file);
+                $vars->{title}     = $entry->{title};
+                $vars->{text}      = $entry->{text};
+                $vars->{update_at} = $entry->{update_at};
             }
             else {
                 return not_found();
@@ -139,10 +161,19 @@ sub handler {
                 },
             );
         };
+        my $content_type = 'text/html';
+        my $flavour = 'html';
+        my $action = $p->{action};
+
+        if ($p->{action} eq 'feed') {
+           $content_type = 'application/xml';
+           $flavour = 'xml';
+           $action = 'index';
+        }
         return [
             200,
-            [ 'Content-Type' => 'text/html' ],
-            [ encode_utf8($tx->render( "$p->{action}.html", $vars )) ]
+            [ 'Content-Type' => $content_type ],
+            [ encode_utf8($tx->render( "$action.$flavour", $vars )) ]
         ];
     }
     else {
