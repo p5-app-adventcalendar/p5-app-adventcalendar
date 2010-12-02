@@ -65,7 +65,7 @@ sub parse_entry {
         title     => $title,
         text      => $text,
         update_at => strftime('%c', @ftime),
-        pubdate   => strftime('%Y-%m-%dT%H:%M:%S%z', @ftime),
+        pubdate   => strftime('%Y-%m-%dT%H:%M:%S', @ftime),
     }
 }
 
@@ -104,7 +104,11 @@ sub handler {
                 my $file = $root->file( $t->ymd . '.txt' );
                 if ( -e $file && ( localtime->year > $p->{year}
                         || $t->yday <= localtime->yday )) {
-                    push @entries, parse_entry($file);
+                    my $entry = parse_entry($file);
+                    my $uri = URI->new;
+                    $uri->path($conf->{base_path} . '/' . $p->{name} . '/' . $t->mday);
+                    $entry->{link} = $uri->as_string;
+                    push @entries, $entry;
                 }
                 $t += ONE_DAY;
             }
