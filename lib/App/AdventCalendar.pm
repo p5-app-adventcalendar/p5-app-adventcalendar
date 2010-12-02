@@ -162,18 +162,16 @@ sub handler {
             );
         };
         my $content_type = 'text/html';
-        my $flavour = 'html';
-        my $action = $p->{action};
+        my $tmpl = "$p->{action}.html";
 
         if ($p->{action} eq 'feed') {
            $content_type = 'application/xml';
-           $flavour = 'xml';
-           $action = 'index';
+           $tmpl = 'index.xml';
         }
         return [
             200,
             [ 'Content-Type' => $content_type ],
-            [ encode_utf8($tx->render( "$action.$flavour", $vars )) ]
+            [ encode_utf8($tx->render( $tmpl, $vars )) ]
         ];
     }
     else {
