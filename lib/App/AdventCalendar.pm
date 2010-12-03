@@ -174,7 +174,7 @@ sub parse_entry {
         text      => $text,
         update_at => strftime( '%c', @ftime ),
         pubdate   => strftime( '%Y-%m-%dT%H:%M:%S', @ftime ),
-        footnotes => ( $inline->can('footnotes') ? $inline->footnotes : () ),
+        footnotes => $inline->can('footnotes') ? $inline->footnotes : {},
     };
 }
 
