@@ -91,7 +91,7 @@ $router->connect('/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/', {
 });
 $router->connect('/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/rss', {
     content_type => 'application/xml',
-    tmpl => 'feed.xml',
+    tmpl => 'index.xml',
     act  => sub {
         my ($root, $vars) = @_;
         my $t = Time::Piece->strptime( "$vars->{year}/12/01", '%Y/%m/%d' );
