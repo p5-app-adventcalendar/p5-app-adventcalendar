@@ -232,7 +232,7 @@ sub handler {
                         my ( $path, $args ) = @_;
                         my $uri = $base->clone;
                         $path =~ s|^/||;
-                        $uri->path( $conf->{assets_path} . $uri->path . $path );
+                        $uri->path( $conf->{base_path} . $uri->path . $path );
                         $uri->query_form(@$args) if $args;
                         $uri;
                     },
