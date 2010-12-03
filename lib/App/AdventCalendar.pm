@@ -127,6 +127,8 @@ $router->connect(
                     $uri->path(
                         $vars->{year} . '/' . $vars->{name} . '/' . $t->mday );
                     $entry->{link} = $uri->as_string;
+                    my @tags = split /,\s*/, $entry->{tags} || '';
+                    $entry->{categories} = \@tags;
                     push @entries, $entry;
                 }
                 $t += ONE_DAY;
