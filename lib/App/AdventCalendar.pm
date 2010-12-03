@@ -189,8 +189,7 @@ sub parse_entry {
         update_at => strftime( '%c', @ftime ),
         pubdate   => strftime( '%Y-%m-%dT%H:%M:%S', @ftime ),
         footnotes => $inline->can('footnotes') ? $inline->footnotes : {},
-		#%meta,
-        author => 'jperl', # Sorry I'll fix
+		author    => $meta{author} || '',
     };
 }
 
