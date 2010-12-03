@@ -165,6 +165,20 @@ sub parse_entry {
 
     my $text = $file->slurp( iomode => '<:utf8' );
     my ( $title, $body ) = split( "\n\n", $text, 2 );
+
+    my ( $tmp, %meta ) = ( '', () );
+    for ( split /\n/, $title ) {
+        if ($tmp) {
+            my ( $key, $value ) = m!^meta-(\w+):\s*(.+)$!;
+            if ($key) {
+                $meta{$key} = $value;
+            }
+        } else {
+            $tmp = $_;
+        }
+    }
+    $title = $tmp;
+
     my $xatena = Text::Xatena->new( hatena_compatible => 1 );
     my $inline = Text::Xatena::Inline->new;
     $text = mark_raw( $xatena->format( $body, inline => $inline ) );
@@ -175,6 +189,7 @@ sub parse_entry {
         update_at => strftime( '%c', @ftime ),
         pubdate   => strftime( '%Y-%m-%dT%H:%M:%S', @ftime ),
         footnotes => $inline->can('footnotes') ? $inline->footnotes : {},
+        %meta,
     };
 }
 
