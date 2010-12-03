@@ -22,116 +22,143 @@ my %xslate;
 
 my $router = Router::Simple->new;
 
-$router->connect('/pull', {
-    tmpl => 'pull.html',
-    act  => sub {
-        my ($root, $vars) = @_;
-        system($ENV{ADVENT_CALENDAR_PULL_COMMAND});
-        die [200, [], ['OK']];
-    },
-});
-$router->connect('/help.html', {
-    tmpl => 'help.html',
-    act  => sub {
-        my ($root, $vars) = @_;
-        my $file = dir( $vars->{conf}->{assets_path} )->file( 'help.txt' );
-        if ( -e $file ) {
-            my $entry = parse_entry($file);
-            $vars->{title}     = $entry->{title};
-            $vars->{text}      = $entry->{text};
-            $vars->{update_at} = $entry->{update_at};
-        }
-        else {
-            die not_found();
-        }
-    },
-});
-$router->connect('/{year:\d{4}}/', {
-    tmpl => 'track_list.html',
-    act  => sub {
-        my ($root, $vars) = @_;
-    },
-});
-$router->connect('/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/', {
-    tmpl => 'index.html',
-    act  => sub {
-        my ($root, $vars) = @_;
-        my $t = Time::Piece->strptime( "$vars->{year}/12/01", '%Y/%m/%d' );
-        my $cache = Cache::MemoryCache->new( { namespace => $vars->{name} } );
-        my @entries;
-        while ( $t->mday <= 25 ) {
-            my $title;
-            my $exists = ( -e $root->file( $t->ymd . '.txt' ) )
+$router->connect(
+    '/pull',
+    {
+        tmpl => 'pull.html',
+        act  => sub {
+            my ( $root, $vars ) = @_;
+            system( $ENV{ADVENT_CALENDAR_PULL_COMMAND} );
+            die [ 200, [], ['OK'] ];
+        },
+    }
+);
+$router->connect(
+    '/help.html',
+    {
+        tmpl => 'help.html',
+        act  => sub {
+            my ( $root, $vars ) = @_;
+            my $file = dir( $vars->{conf}->{assets_path} )->file('help.txt');
+            if ( -e $file ) {
+                my $entry = parse_entry($file);
+                $vars->{title}     = $entry->{title};
+                $vars->{text}      = $entry->{text};
+                $vars->{update_at} = $entry->{update_at};
+            }
+            else {
+                die not_found();
+            }
+        },
+    }
+);
+$router->connect(
+    '/{year:\d{4}}/',
+    {
+        tmpl => 'track_list.html',
+        act  => sub {
+            my ( $root, $vars ) = @_;
+        },
+    }
+);
+$router->connect(
+    '/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/',
+    {
+        tmpl => 'index.html',
+        act  => sub {
+            my ( $root, $vars ) = @_;
+            my $t = Time::Piece->strptime( "$vars->{year}/12/01", '%Y/%m/%d' );
+            my $cache =
+              Cache::MemoryCache->new( { namespace => $vars->{name} } );
+            my @entries;
+            while ( $t->mday <= 25 ) {
+                my $title;
+                my $exists = ( -e $root->file( $t->ymd . '.txt' ) )
                   && ( localtime->year > $vars->{year}
                     || $t->yday <= localtime->yday ) ? 1 : 0;
 
-            if ( $exists ) {
-                my ( $cached_mtime, $cached_title ) = split/\t/, ( $cache->get( $t->mday ) || "0\t" );
-                my $mtime = $root->file( $t->ymd . '.txt' )->stat->[9];
-                if ( not $cached_title or $mtime > $cached_mtime ) {
-                    my $fh    = $root->file( $t->ymd . '.txt' )->open;
-                    $title = <$fh>; chomp($title);
-                    $cache->set( $t->mday => "$mtime\t$title", 'never' );
+                if ($exists) {
+                    my ( $cached_mtime, $cached_title ) = split /\t/,
+                      ( $cache->get( $t->mday ) || "0\t" );
+                    my $mtime = $root->file( $t->ymd . '.txt' )->stat->[9];
+                    if ( not $cached_title or $mtime > $cached_mtime ) {
+                        my $fh = $root->file( $t->ymd . '.txt' )->open;
+                        $title = <$fh>;
+                        chomp($title);
+                        $cache->set( $t->mday => "$mtime\t$title", 'never' );
+                    }
+                    else {
+                        $title = $cached_title;
+                    }
                 }
-                else {
-                    $title = $cached_title;
-                }
-            }
 
-            push @entries,
-              {
-                date   => Time::Piece->new($t),
-                exists => $exists,,
-                title  => $title,
-              };
-            $t += ONE_DAY;
-        }
-        $vars->{entries} = \@entries;
-    },
-});
-$router->connect('/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/rss', {
-    content_type => 'application/xml',
-    tmpl => 'index.xml',
-    act  => sub {
-        my ($root, $vars) = @_;
-        my $t = Time::Piece->strptime( "$vars->{year}/12/01", '%Y/%m/%d' );
-        my @entries;
-        while ( $t->mday <= 25 ) {
+                push @entries,
+                  {
+                    date   => Time::Piece->new($t),
+                    exists => $exists,
+                    ,
+                    title => $title,
+                  };
+                $t += ONE_DAY;
+            }
+            $vars->{entries} = \@entries;
+        },
+    }
+);
+$router->connect(
+    '/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/rss',
+    {
+        content_type => 'application/xml',
+        tmpl         => 'index.xml',
+        act          => sub {
+            my ( $root, $vars ) = @_;
+            my $t = Time::Piece->strptime( "$vars->{year}/12/01", '%Y/%m/%d' );
+            my @entries;
+            while ( $t->mday <= 25 ) {
+                my $file = $root->file( $t->ymd . '.txt' );
+                if (
+                    -e $file
+                    && ( localtime->year > $vars->{year}
+                        || $t->yday <= localtime->yday )
+                  )
+                {
+                    my $entry = parse_entry($file);
+                    my $uri   = URI->new;
+                    $uri->path(
+                        $vars->{year} . '/' . $vars->{name} . '/' . $t->mday );
+                    $entry->{link} = $uri->as_string;
+                    push @entries, $entry;
+                }
+                $t += ONE_DAY;
+            }
+            $vars->{entries} = \@entries;
+        },
+    }
+);
+$router->connect(
+    '/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/{day:\d{1,2}}',
+    {
+        tmpl => 'entry.html',
+        act  => sub {
+            my ( $root, $vars ) = @_;
+            my $t = Time::Piece->strptime(
+                "$vars->{year}/12/@{[sprintf('%02d',$vars->{day})]}",
+                '%Y/%m/%d' );
             my $file = $root->file( $t->ymd . '.txt' );
-            if ( -e $file && ( localtime->year > $vars->{year}
-                    || $t->yday <= localtime->yday )) {
+
+            if ( -e $file ) {
                 my $entry = parse_entry($file);
-                my $uri = URI->new;
-                $uri->path($vars->{year} . '/' . $vars->{name} . '/' . $t->mday);
-                $entry->{link} = $uri->as_string;
-                push @entries, $entry;
+                $vars->{title}     = $entry->{title};
+                $vars->{text}      = $entry->{text};
+                $vars->{update_at} = $entry->{update_at};
+                $vars->{footnotes} = $entry->{footnotes};
             }
-            $t += ONE_DAY;
-        }
-        $vars->{entries} = \@entries;
-    },
-});
-$router->connect('/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/{day:\d{1,2}}', {
-    tmpl => 'entry.html',
-    act  => sub {
-        my ($root, $vars) = @_;
-        my $t = Time::Piece->strptime(
-                "$vars->{year}/12/@{[sprintf('%02d',$vars->{day})]}", '%Y/%m/%d' );
-        my $file = $root->file($t->ymd . '.txt');
-
-        if ( -e $file ) {
-            my $entry = parse_entry($file);
-            $vars->{title}     = $entry->{title};
-            $vars->{text}      = $entry->{text};
-            $vars->{update_at} = $entry->{update_at};
-            $vars->{footnotes} = $entry->{footnotes};
-        }
-        else {
-            die not_found();
-        }
-    },
-});
-
+            else {
+                die not_found();
+            }
+        },
+    }
+);
 
 sub parse_entry {
     my $file = shift;
@@ -140,40 +167,38 @@ sub parse_entry {
     my ( $title, $body ) = split( "\n\n", $text, 2 );
     my $xatena = Text::Xatena->new( hatena_compatible => 1 );
     my $inline = Text::Xatena::Inline->new;
-    $text = mark_raw(
-        $xatena->format(
-            $body,
-            inline => $inline
-        )
-    );
-    my @ftime = localtime((stat($file))[9]);
+    $text = mark_raw( $xatena->format( $body, inline => $inline ) );
+    my @ftime = localtime( ( stat($file) )[9] );
     return {
         title     => $title,
         text      => $text,
-        update_at => strftime('%c', @ftime),
-        pubdate   => strftime('%Y-%m-%dT%H:%M:%S', @ftime),
-        footnotes => ($inline->can('footnotes') ? $inline->footnotes : ()),
-    }
+        update_at => strftime( '%c', @ftime ),
+        pubdate   => strftime( '%Y-%m-%dT%H:%M:%S', @ftime ),
+        footnotes => ( $inline->can('footnotes') ? $inline->footnotes : () ),
+    };
 }
 
 sub handler {
-    my ($env, $conf) = @_;
+    my ( $env, $conf ) = @_;
     if ( my $p = $router->match($env) ) {
         my $root = dir( $conf->{assets_path}, $p->{year}, $p->{name} );
         return not_found() unless -d $root;
 
-        my $req  = Plack::Request->new($env);
+        my $req = Plack::Request->new($env);
         my $vars = { req => $req, %$p };
         $vars->{conf} = $conf;
-        $vars->{tracks} = [ map { $_->dir_list(-1) } grep {
-            $_->is_dir and !$p->{year} ? $_->stringify !~ /tmpl/ : 1
-        } dir( $conf->{assets_path}, $p->{year} )->children( no_hidden => 1 ) ];
+        $vars->{tracks} =
+          [ map { $_->dir_list(-1) }
+              grep { $_->is_dir and !$p->{year} ? $_->stringify !~ /tmpl/ : 1 }
+              dir( $conf->{assets_path}, $p->{year} )
+              ->children( no_hidden => 1 ) ];
 
-        eval { $p->{act}->($root, $vars) };
+        eval { $p->{act}->( $root, $vars ) };
         if ($@) {
-            if (ref($@) eq 'ARRAY') {
+            if ( ref($@) eq 'ARRAY' ) {
                 return $@;
-            } else {
+            }
+            else {
                 die $@;
             }
         }
@@ -181,16 +206,18 @@ sub handler {
         my $tx = $xslate{$root} ||= do {
             my $base = $req->base;
             Text::Xslate->new(
-                syntax    => 'TTerse',
-                path      => [$root->subdir('tmpl'), dir($conf->{assets_path},'tmpl')],
+                syntax => 'TTerse',
+                path   => [
+                    $root->subdir('tmpl'), dir( $conf->{assets_path}, 'tmpl' )
+                ],
                 cache_dir => '/tmp/app-adventcalendar',
                 cache     => 1,
                 function  => {
                     uri_for => sub {
-                        my($path, $args) = @_;
+                        my ( $path, $args ) = @_;
                         my $uri = $base->clone;
                         $path =~ s|^/||;
-                        $uri->path($conf->{base_path} . $uri->path . $path);
+                        $uri->path( $conf->{base_path} . $uri->path . $path );
                         $uri->query_form(@$args) if $args;
                         $uri;
                     },
@@ -198,12 +225,12 @@ sub handler {
             );
         };
         my $content_type = $p->{content_type} || 'text/html';
-        my $tmpl         = $p->{tmpl};
+        my $tmpl = $p->{tmpl};
 
         return [
             200,
             [ 'Content-Type' => $content_type ],
-            [ encode_utf8($tx->render( $tmpl, $vars )) ]
+            [ encode_utf8( $tx->render( $tmpl, $vars ) ) ]
         ];
     }
     else {
