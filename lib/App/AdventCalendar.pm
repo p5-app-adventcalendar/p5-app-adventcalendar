@@ -8,13 +8,12 @@ use Plack::Request;
 use Router::Simple;
 use Text::Xslate qw/mark_raw/;
 use Path::Class;
-use Time::Piece;
-use Time::Seconds;
+use Time::Piece ();
+use Time::Seconds qw(ONE_DAY);
 use Text::Xatena;
 use Text::Xatena::Inline;
 use Cache::MemoryCache;
 use Encode;
-use POSIX 'strftime';
 
 eval { require File::Spec::Memoized };
 
@@ -68,14 +67,15 @@ $router->connect(
         act  => sub {
             my ( $root, $vars ) = @_;
             my $t = Time::Piece->strptime( "$vars->{year}/12/01", '%Y/%m/%d' );
+            my $now = Time::Piece->localtime;
             my $cache =
               Cache::MemoryCache->new( { namespace => $vars->{name} } );
             my @entries;
             while ( $t->mday <= 25 ) {
                 my $title;
                 my $exists = ( -e $root->file( $t->ymd . '.txt' ) )
-                  && ( localtime->year > $vars->{year}
-                    || $t->yday <= localtime->yday ) ? 1 : 0;
+                  && ( $now->year > $vars->{year}
+                    || $t->yday <= $now->yday ) ? 1 : 0;
 
                 if ($exists) {
                     my ( $cached_mtime, $cached_title ) = split /\t/,
@@ -113,13 +113,14 @@ $router->connect(
         act          => sub {
             my ( $root, $vars ) = @_;
             my $t = Time::Piece->strptime( "$vars->{year}/12/01", '%Y/%m/%d' );
+            my $now = Time::Piece->localtime;
             my @entries;
             while ( $t->mday <= 25 ) {
                 my $file = $root->file( $t->ymd . '.txt' );
                 if (
                     -e $file
-                    && ( localtime->year > $vars->{year}
-                        || $t->yday <= localtime->yday )
+                    && ( $now->year > $vars->{year}
+                        || $t->yday <= $now->yday )
                   )
                 {
                     my $entry = parse_entry($file);
@@ -184,12 +185,12 @@ sub parse_entry {
     my $xatena = Text::Xatena->new( hatena_compatible => 1 );
     my $inline = Text::Xatena::Inline->new;
     $text = mark_raw( $xatena->format( $body, inline => $inline ) );
-    my @ftime = localtime( ( stat($file) )[9] );
+    my $ftime = Time::Piece->localtime( ( stat($file) )[9] );
     return {
         title     => $title,
         text      => $text,
-        update_at => strftime( '%c', @ftime ),
-        pubdate   => strftime( '%Y-%m-%dT%H:%M:%S', @ftime ),
+        update_at => $ftime->strftime( '%c' ),
+        pubdate   => $ftime->strftime( '%Y-%m-%dT%H:%M:%S' ),
         footnotes => $inline->can('footnotes') ? $inline->footnotes : {},
         %meta,
     };
