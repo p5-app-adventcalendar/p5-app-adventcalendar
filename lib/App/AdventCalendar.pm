@@ -95,7 +95,6 @@ $router->connect(
                   {
                     date   => Time::Piece->new($t),
                     exists => $exists,
-                    ,
                     title => $title,
                   };
                 $t += ONE_DAY;
