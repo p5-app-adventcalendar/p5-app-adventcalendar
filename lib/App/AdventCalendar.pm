@@ -171,7 +171,7 @@ sub parse_entry {
     my ( $tmp, %meta ) = ( '', () );
     for ( split /\n/, $title ) {
         if ($tmp) {
-            my ( $key, $value ) = m!^meta-(\w+):\s*(.+)$!;
+            my ( $key, $value ) = m{^meta-(\w+):\s*(.+)$};
             if ($key) {
                 $meta{$key} = $value;
             }
