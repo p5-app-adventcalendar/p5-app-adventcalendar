@@ -3,7 +3,10 @@ use Test::More;
 use HTTP::Request;
 use App::AdventCalendar;
 
-my $app = sub { App::AdventCalendar::handler(@_) };
+my $conf = do 'config.pl' or
+            die "please run 'cp config.pl.sample config.pl' and edit config.pl";
+
+my $app = sub { App::AdventCalendar::handler(@_, $conf) };
 
 test_psgi $app, sub {
     my $cb = shift;
