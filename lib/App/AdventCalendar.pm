@@ -80,7 +80,7 @@ $router->connect(
                 if ($exists) {
                     my ( $cached_mtime, $cached_title ) = split /\t/,
                       ( $cache->get( $t->mday ) || "0\t" );
-                    my $mtime = $root->file( $t->ymd . '.txt' )->stat->[9];
+                    my $mtime = $root->file( $t->ymd . '.txt' )->stat->mtime;
                     if ( not $cached_title or $mtime > $cached_mtime ) {
                         my $fh = $root->file( $t->ymd . '.txt' )->open;
                         $title = <$fh>;
@@ -185,7 +185,7 @@ sub parse_entry {
     my $xatena = Text::Xatena->new( hatena_compatible => 1 );
     my $inline = Text::Xatena::Inline->new;
     $text = mark_raw( $xatena->format( $body, inline => $inline ) );
-    my $ftime = Time::Piece->localtime( ( stat($file) )[9] );
+    my $ftime = Time::Piece->localtime( $file->stat->mtime );
     return {
         title     => $title,
         text      => $text,
