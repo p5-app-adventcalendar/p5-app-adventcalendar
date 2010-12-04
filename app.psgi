@@ -14,6 +14,5 @@ my $app = sub { App::AdventCalendar::handler($_[0], $conf) };
 builder {
     enable 'Static', path => qr{^/(?:img|css|js)/}, root => "$conf->{assets_path}/htdocs/";
     enable 'ReverseProxy';
-    enable 'Lint';
     $app;
 };
