@@ -13,7 +13,6 @@ use Time::Seconds qw(ONE_DAY);
 use Text::Xatena;
 use Text::Xatena::Inline;
 use Cache::MemoryCache;
-use Encode;
 
 eval { require File::Spec::Memoized };
 
@@ -243,12 +242,15 @@ sub handler {
             );
         };
         my $content_type = $p->{content_type} || 'text/html';
-        my $tmpl = $p->{tmpl};
-
+        my $body         = $tx->render($p->{tmpl}, $vars);
+        utf8::encode($body);
         return [
             200,
-            [ 'Content-Type' => $content_type ],
-            [ encode_utf8( $tx->render( $tmpl, $vars ) ) ]
+            [
+              'Content-Type'   => $content_type,
+              'Content-Length' => length($body),
+            ],
+            [ $body ]
         ];
     }
     else {
