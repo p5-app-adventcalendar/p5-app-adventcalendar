@@ -185,12 +185,13 @@ sub parse_entry {
     my $inline = Text::Xatena::Inline->new;
     $text = mark_raw( $xatena->format( $body, inline => $inline ) );
     my $ftime = Time::Piece->localtime( $file->stat->mtime );
+    my @footnotes = $inline->can('footnotes') ? $inline->footnotes : ();
     return {
         title     => $title,
         text      => $text,
         update_at => $ftime->strftime( '%c' ),
         pubdate   => $ftime->strftime( '%Y-%m-%dT%H:%M:%S' ),
-        footnotes => $inline->can('footnotes') ? $inline->footnotes : {},
+        footnotes => \@footnotes,
         %meta,
     };
 }
@@ -237,6 +238,15 @@ sub handler {
                         $uri->path( $conf->{base_path} . $uri->path . $path );
                         $uri->query_form(@$args) if $args;
                         $uri;
+                    },
+                    format_date => sub {
+                        my ( $tp, $args ) = @_;
+                        my $r = $tp->strftime('%Y-%m-%d(%a)');
+                        if ($^O eq 'MSWin32') {
+                            require Encode;
+                            $r = Encode::decode('cp932', $r);
+                        }
+                        $r;
                     },
                 },
             );
