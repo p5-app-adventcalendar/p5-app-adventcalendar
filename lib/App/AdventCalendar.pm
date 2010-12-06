@@ -185,7 +185,7 @@ sub parse_entry {
     my $inline = Text::Xatena::Inline->new;
     $text = mark_raw( $xatena->format( $body, inline => $inline ) );
     my $ftime = Time::Piece->localtime( $file->stat->mtime );
-    my @footnotes = $inline->can('footnotes') ? $inline->footnotes : ();
+    my @footnotes = $inline->can('footnotes') ? @{$inline->footnotes} : ();
     return {
         title     => $title,
         text      => $text,
