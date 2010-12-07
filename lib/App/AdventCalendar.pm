@@ -95,7 +95,6 @@ $router->connect(
                   {
                     date   => Time::Piece->new($t),
                     exists => $exists,
-                    ,
                     title => $title,
                   };
                 $t += ONE_DAY;
@@ -134,6 +133,68 @@ $router->connect(
                 $t += ONE_DAY;
             }
             $vars->{entries} = \@entries;
+        },
+    }
+);
+$router->connect(
+    '/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/calendar',
+    {
+        tmpl => 'calendar.html',
+        act  => sub {
+            my ( $root, $vars ) = @_;
+            my $t = Time::Piece->strptime( "$vars->{year}/12/01", '%Y/%m/%d' );
+            my $now = Time::Piece->localtime;
+            my $cache =
+              Cache::MemoryCache->new( { namespace => $vars->{name} } );
+            my $startwday = ($t->wday - $t->mday % 7 + 1 + 7) % 7;
+            my (@cols, @rows, $i);
+
+            @cols = ();
+            for ( 1..($startwday-1) ) {
+                push @cols,
+                  {
+                    date   => undef,
+                    exists => 0,
+                    title => '',
+                  };
+            }
+            while ( $t->mday <= 25 ) {
+                my $title;
+                my $exists = ( -e $root->file( $t->ymd . '.txt' ) )
+                  && ( $now->year > $vars->{year}
+                    || $t->yday <= $now->yday ) ? 1 : 0;
+
+                if ($exists) {
+                    my ( $cached_mtime, $cached_title ) = split /\t/,
+                      ( $cache->get( $t->mday ) || "0\t" );
+                    my $mtime = $root->file( $t->ymd . '.txt' )->stat->mtime;
+                    if ( not $cached_title or $mtime > $cached_mtime ) {
+                        my $fh = $root->file( $t->ymd . '.txt' )->open;
+                        $title = <$fh>;
+                        chomp($title);
+                        $cache->set( $t->mday => "$mtime\t$title", 'never' );
+                    }
+                    else {
+                        $title = $cached_title;
+                    }
+                }
+
+                if ( $t->day_of_week == 0 ) {
+                    my @tmp = @cols;
+                    push @rows, { cols => \@tmp };
+                    @cols = ();
+                }
+                push @cols,
+                  {
+                    date   => Time::Piece->new($t),
+                    exists => $exists,
+                    title => $title,
+                  };
+                $t += ONE_DAY;
+            }
+            my @tmp = @cols;
+            push @rows, { cols => \@tmp };
+            $vars->{calendar} = { rows => \@rows };
         },
     }
 );
