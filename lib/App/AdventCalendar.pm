@@ -95,7 +95,7 @@ $router->connect(
                   {
                     date   => Time::Piece->new($t),
                     exists => $exists,
-                    title => $title,
+                    title  => $title,
                   };
                 $t += ONE_DAY;
             }
@@ -117,7 +117,7 @@ $router->connect(
                 my $file = $root->file( $t->ymd . '.txt' );
                 if (
                     -e $file
-                    && ( $now->year > $vars->{year}
+                    && (   $now->year > $vars->{year}
                         || $t->yday <= $now->yday )
                   )
                 {
@@ -146,18 +146,17 @@ $router->connect(
             my $now = Time::Piece->localtime;
             my $cache =
               Cache::MemoryCache->new( { namespace => $vars->{name} } );
-            my $startwday = ($t->wday - $t->mday % 7 + 1 + 7) % 7;
-            my (@cols, @rows, $i);
+            my ( @cols, @rows, $i );
 
             @cols = ();
-            for ( 1..($startwday-1) ) {
-                push @cols,
-                  {
-                    date   => undef,
-                    exists => 0,
-                    title => '',
-                  };
-            }
+            push @cols,
+              {
+                date   => undef,
+                exists => 0,
+                title  => '',
+              }
+              for 1 .. ( $t->wday - 1 );
+
             while ( $t->mday <= 25 ) {
                 my $title;
                 my $exists = ( -e $root->file( $t->ymd . '.txt' ) )
@@ -184,11 +183,12 @@ $router->connect(
                     push @rows, { cols => \@tmp };
                     @cols = ();
                 }
+
                 push @cols,
                   {
                     date   => Time::Piece->new($t),
                     exists => $exists,
-                    title => $title,
+                    title  => $title,
                   };
                 $t += ONE_DAY;
             }
@@ -236,7 +236,8 @@ sub parse_entry {
             if ($key) {
                 $meta{$key} = $value;
             }
-        } else {
+        }
+        else {
             $tmp = $_;
         }
     }
@@ -246,12 +247,12 @@ sub parse_entry {
     my $inline = Text::Xatena::Inline->new;
     $text = mark_raw( $xatena->format( $body, inline => $inline ) );
     my $ftime = Time::Piece->localtime( $file->stat->mtime );
-    my @footnotes = $inline->can('footnotes') ? @{$inline->footnotes} : ();
+    my @footnotes = $inline->can('footnotes') ? @{ $inline->footnotes } : ();
     return {
         title     => $title,
         text      => $text,
-        update_at => $ftime->strftime( '%c' ),
-        pubdate   => $ftime->strftime( '%Y-%m-%dT%H:%M:%S' ),
+        update_at => $ftime->strftime('%c'),
+        pubdate   => $ftime->strftime('%Y-%m-%dT%H:%M:%S'),
         footnotes => \@footnotes,
         %meta,
     };
@@ -265,12 +266,13 @@ sub handler {
 
         my $req = Plack::Request->new($env);
         my $vars = { req => $req, %$p };
-        $vars->{conf} = $conf;
-        $vars->{tracks} =
-          [ map { $_->dir_list(-1) }
+        $vars->{conf}   = $conf;
+        $vars->{tracks} = [
+            map { $_->dir_list(-1) }
               grep { $_->is_dir and !$p->{year} ? $_->stringify !~ /tmpl/ : 1 }
               dir( $conf->{assets_path}, $p->{year} )
-              ->children( no_hidden => 1 ) ];
+              ->children( no_hidden => 1 )
+        ];
 
         eval { $p->{act}->( $root, $vars ) };
         if ($@) {
@@ -303,9 +305,9 @@ sub handler {
                     format_date => sub {
                         my ( $tp, $args ) = @_;
                         my $r = $tp->strftime('%Y-%m-%d(%a)');
-                        if ($^O eq 'MSWin32') {
+                        if ( $^O eq 'MSWin32' ) {
                             require Encode;
-                            $r = Encode::decode('cp932', $r);
+                            $r = Encode::decode( 'cp932', $r );
                         }
                         $r;
                     },
@@ -313,15 +315,15 @@ sub handler {
             );
         };
         my $content_type = $p->{content_type} || 'text/html';
-        my $body         = $tx->render($p->{tmpl}, $vars);
+        my $body = $tx->render( $p->{tmpl}, $vars );
         utf8::encode($body);
         return [
             200,
             [
-              'Content-Type'   => $content_type,
-              'Content-Length' => length($body),
+                'Content-Type'   => $content_type,
+                'Content-Length' => length($body),
             ],
-            [ $body ]
+            [$body]
         ];
     }
     else {
