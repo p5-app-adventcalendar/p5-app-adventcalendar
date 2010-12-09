@@ -132,6 +132,7 @@ $router->connect(
                 }
                 $t += ONE_DAY;
             }
+            @entries = reverse @entries;
             $vars->{entries} = \@entries;
         },
     }
