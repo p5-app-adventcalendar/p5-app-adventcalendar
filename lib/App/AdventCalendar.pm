@@ -155,7 +155,7 @@ $router->connect(
                 exists => 0,
                 title  => '',
               }
-              for 1 .. ( $t->wday - 1 );
+              for 1 .. $t->day_of_week;
 
             while ( $t->mday <= 25 ) {
                 my $title;
