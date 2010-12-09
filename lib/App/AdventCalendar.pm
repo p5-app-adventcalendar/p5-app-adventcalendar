@@ -252,7 +252,7 @@ sub parse_entry {
         title     => $title,
         text      => $text,
         update_at => $ftime->strftime('%c'),
-        pubdate   => $ftime->strftime('%Y-%m-%dT%H:%M:%S'),
+        pubdate   => $ftime->strftime('%a, %d %b %Y %H:%M:%S %z'),
         footnotes => \@footnotes,
         %meta,
     };
