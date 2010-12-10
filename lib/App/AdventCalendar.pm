@@ -314,7 +314,7 @@ sub handler {
                     },
                     html_escape_hex => sub {
                         my ( $str, $args ) = @_;
-                        $str =~ s/([^A-Za-z0-9\-_.!~*'()@ ])/'&#'.sprintf('%X', ord($1)).';'/ge;
+                        $str =~ s/([^A-Za-z0-9\-_.!~*'()@ ])/'&#x'.sprintf('%X', ord($1)).';'/ge;
                         $str;
                     },
                 },
