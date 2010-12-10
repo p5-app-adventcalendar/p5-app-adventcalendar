@@ -312,6 +312,11 @@ sub handler {
                         }
                         $r;
                     },
+                    html_escape_hex => sub {
+                        my ( $str, $args ) = @_;
+                        $str =~ s/([^A-Za-z0-9\-_.!~*'()@ ])/'&#'.sprintf('%X', ord($1)).';'/ge;
+                        $str;
+                    },
                 },
             );
         };
