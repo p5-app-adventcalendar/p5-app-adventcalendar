@@ -10,6 +10,7 @@ use Text::Xslate qw/mark_raw/;
 use Path::Class;
 use Time::Piece ();
 use Time::Seconds qw(ONE_DAY);
+use Date::Format;
 use Text::Xatena;
 use Text::Xatena::Inline;
 use Cache::MemoryCache;
@@ -247,13 +248,12 @@ sub parse_entry {
     my $xatena = Text::Xatena->new( hatena_compatible => 1 );
     my $inline = Text::Xatena::Inline->new;
     $text = mark_raw( $xatena->format( $body, inline => $inline ) );
-    my $ftime = Time::Piece->localtime( $file->stat->mtime );
     my @footnotes = $inline->can('footnotes') ? @{ $inline->footnotes } : ();
     return {
         title     => $title,
         text      => $text,
-        update_at => $ftime->strftime('%c'),
-        pubdate   => $ftime->strftime('%a, %d %b %Y %H:%M:%S %z'),
+        update_at => time2str('%c', $file->stat->mtime),
+        pubdate   => time2str('%a, %d %b %Y %H:%M:%S %z', $file->stat->mtime),
         footnotes => \@footnotes,
         %meta,
     };
