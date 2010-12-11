@@ -8,6 +8,7 @@ requires 'Router::Simple';
 requires 'Text::Xslate' => '0.05';
 requires 'Text::Xatena';
 requires 'Time::Piece';
+requires 'Date::Format';
 requires 'Plack';
 
 recommends 'File::Spec::Memoized'; # for performance

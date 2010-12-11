@@ -10,6 +10,7 @@ use Text::Xslate qw/mark_raw/;
 use Path::Class;
 use Time::Piece ();
 use Time::Seconds qw(ONE_DAY);
+use Date::Format;
 use Text::Xatena;
 use Text::Xatena::Inline;
 use Cache::MemoryCache;
@@ -95,7 +96,7 @@ $router->connect(
                   {
                     date   => Time::Piece->new($t),
                     exists => $exists,
-                    title => $title,
+                    title  => $title,
                   };
                 $t += ONE_DAY;
             }
@@ -117,7 +118,7 @@ $router->connect(
                 my $file = $root->file( $t->ymd . '.txt' );
                 if (
                     -e $file
-                    && ( $now->year > $vars->{year}
+                    && (   $now->year > $vars->{year}
                         || $t->yday <= $now->yday )
                   )
                 {
@@ -132,7 +133,70 @@ $router->connect(
                 }
                 $t += ONE_DAY;
             }
+            @entries = reverse @entries;
             $vars->{entries} = \@entries;
+        },
+    }
+);
+$router->connect(
+    '/{year:\d{4}}/{name:[a-zA-Z0-9_-]+?}/calendar',
+    {
+        tmpl => 'calendar.html',
+        act  => sub {
+            my ( $root, $vars ) = @_;
+            my $t = Time::Piece->strptime( "$vars->{year}/12/01", '%Y/%m/%d' );
+            my $now = Time::Piece->localtime;
+            my $cache =
+              Cache::MemoryCache->new( { namespace => $vars->{name} } );
+            my ( @cols, @rows, $i );
+
+            @cols = ();
+            push @cols,
+              {
+                date   => undef,
+                exists => 0,
+                title  => '',
+              }
+              for 1 .. $t->day_of_week;
+
+            while ( $t->mday <= 25 ) {
+                my $title;
+                my $exists = ( -e $root->file( $t->ymd . '.txt' ) )
+                  && ( $now->year > $vars->{year}
+                    || $t->yday <= $now->yday ) ? 1 : 0;
+
+                if ($exists) {
+                    my ( $cached_mtime, $cached_title ) = split /\t/,
+                      ( $cache->get( $t->mday ) || "0\t" );
+                    my $mtime = $root->file( $t->ymd . '.txt' )->stat->mtime;
+                    if ( not $cached_title or $mtime > $cached_mtime ) {
+                        my $fh = $root->file( $t->ymd . '.txt' )->open;
+                        $title = <$fh>;
+                        chomp($title);
+                        $cache->set( $t->mday => "$mtime\t$title", 'never' );
+                    }
+                    else {
+                        $title = $cached_title;
+                    }
+                }
+
+                if ( $t->day_of_week == 0 ) {
+                    my @tmp = @cols;
+                    push @rows, { cols => \@tmp };
+                    @cols = ();
+                }
+
+                push @cols,
+                  {
+                    date   => Time::Piece->new($t),
+                    exists => $exists,
+                    title  => $title,
+                  };
+                $t += ONE_DAY;
+            }
+            my @tmp = @cols;
+            push @rows, { cols => \@tmp };
+            $vars->{calendar} = { rows => \@rows };
         },
     }
 );
@@ -174,7 +238,8 @@ sub parse_entry {
             if ($key) {
                 $meta{$key} = $value;
             }
-        } else {
+        }
+        else {
             $tmp = $_;
         }
     }
@@ -183,13 +248,13 @@ sub parse_entry {
     my $xatena = Text::Xatena->new( hatena_compatible => 1 );
     my $inline = Text::Xatena::Inline->new;
     $text = mark_raw( $xatena->format( $body, inline => $inline ) );
-    my $ftime = Time::Piece->localtime( $file->stat->mtime );
+    my @footnotes = $inline->can('footnotes') ? @{ $inline->footnotes } : ();
     return {
         title     => $title,
         text      => $text,
-        update_at => $ftime->strftime( '%c' ),
-        pubdate   => $ftime->strftime( '%Y-%m-%dT%H:%M:%S' ),
-        footnotes => $inline->can('footnotes') ? $inline->footnotes : {},
+        update_at => time2str('%c', $file->stat->mtime),
+        pubdate   => time2str('%a, %d %b %Y %H:%M:%S %z', $file->stat->mtime),
+        footnotes => \@footnotes,
         %meta,
     };
 }
@@ -202,12 +267,13 @@ sub handler {
 
         my $req = Plack::Request->new($env);
         my $vars = { req => $req, %$p };
-        $vars->{conf} = $conf;
-        $vars->{tracks} =
-          [ map { $_->dir_list(-1) }
+        $vars->{conf}   = $conf;
+        $vars->{tracks} = [
+            map { $_->dir_list(-1) }
               grep { $_->is_dir and !$p->{year} ? $_->stringify !~ /tmpl/ : 1 }
               dir( $conf->{assets_path}, $p->{year} )
-              ->children( no_hidden => 1 ) ];
+              ->children( no_hidden => 1 )
+        ];
 
         eval { $p->{act}->( $root, $vars ) };
         if ($@) {
@@ -237,19 +303,33 @@ sub handler {
                         $uri->query_form(@$args) if $args;
                         $uri;
                     },
+                    format_date => sub {
+                        my ( $tp, $args ) = @_;
+                        my $r = $tp->strftime('%Y-%m-%d(%a)');
+                        if ( $^O eq 'MSWin32' ) {
+                            require Encode;
+                            $r = Encode::decode( 'cp932', $r );
+                        }
+                        $r;
+                    },
+                    html_escape_hex => sub {
+                        my ( $str, $args ) = @_;
+                        $str =~ s/([^A-Za-z0-9\-_.!~*'()@ ])/'&#x'.sprintf('%X', ord($1)).';'/ge;
+                        $str;
+                    },
                 },
             );
         };
         my $content_type = $p->{content_type} || 'text/html';
-        my $body         = $tx->render($p->{tmpl}, $vars);
+        my $body = $tx->render( $p->{tmpl}, $vars );
         utf8::encode($body);
         return [
             200,
             [
-              'Content-Type'   => $content_type,
-              'Content-Length' => length($body),
+                'Content-Type'   => $content_type,
+                'Content-Length' => length($body),
             ],
-            [ $body ]
+            [$body]
         ];
     }
     else {

@@ -1,58 +1,55 @@
-<?xml version="1.0" encoding="UTF-8"?> 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja"> 
-<head profile="http://purl.org/net/ns/metaprof"> 
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
-    <link rel="stylesheet" href="http://bulknews.typepad.com/test/styles.css" media="all" /> 
-    <title>[% title %] - [% year %] advent calendar [% name %]</title>
-</title> 
-<!--
-    <link rel="alternate" type="application/rss+xml" title="RSS" href="http://perl-users.jp/articles/advent-calendar/2009/hacker/index.xml" /> 
--->
-    <link rel="stylesheet" href="http://perl-users.jp/articles/advent-calendar/prettify.css" type="text/css" media="screen" /> 
-<meta http-equiv="Content-Script-Type" content="text/javascript" /> 
-<script type="text/javascript" src="http://google-code-prettify.googlecode.com/svn/trunk/src/prettify.js"></script> 
-<script type="text/javascript" src="http://perl-users.jp/articles/advent-calendar/adventcal2009.js"></script> 
-<script type="text/javascript" src="http://s.hatena.ne.jp/js/HatenaStar.js"></script> 
-<script type="text/javascript"> 
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+<head profile="http://purl.org/net/ns/metaprof">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="http://bulknews.typepad.com/test/styles.css" media="all" />
+    <title>[% title %] - JPerl advent calendar [% year %] [% name %] Track</title>
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="[% uri_for(year _ '/' _ name _ '/rss') %]" />
+    <link rel="stylesheet" href="http://perl-users.jp/articles/advent-calendar/prettify.css" type="text/css" media="screen" />
+<meta http-equiv="Content-Script-Type" content="text/javascript" />
+<script type="text/javascript" src="http://google-code-prettify.googlecode.com/svn/trunk/src/prettify.js"></script>
+<script type="text/javascript" src="http://perl-users.jp/articles/advent-calendar/adventcal2009.js"></script>
+<script type="text/javascript" src="http://s.hatena.ne.jp/js/HatenaStar.js"></script>
+<script type="text/javascript">
     Hatena.Star.SiteConfig = { entryNodes: { 'div.entry': { uri: 'document.location', title: 'document.title', container: 'h1.entry-header' } } };
-</script> 
- 
-<style type="text/css"> 
+</script>
+
+<style type="text/css">
     pre {
         border-left: 2px solid #cccccc;
         padding-left: 4px;
         margin-left: 10px;
         overflow: auto;
     }
-</style> 
- 
-</head> 
-<body class="layout-two-column-right"> 
-<div id="container"> 
-    <div id="container-inner" class="pkg"> 
- 
-        <div id="banner"> 
-            <div id="banner-inner" class="pkg"> 
-                <h1 id="banner-header">[% title %] - [% year %] advent calendar [% name %]</h1>
-                <p id="banner-description">Perl に関するちょっとした Tips をのっけてみるよ。ちゃんと続くかな？</p> 
-            </div> 
-        </div> 
-    </div> 
- 
-    <div id="pagebody"> 
-        <div id="pagebody-inner"> 
-            <div id="alpha"> 
-                <div id="alpha-inner"> 
- 
- 
-<div class="entry"> 
-    <h1 class="entry-header">[% title %]<a href="http://b.hatena.ne.jp/entry/[% req.uri | uri %]"><img src="http://b.hatena.ne.jp/entry/image/[% req.uri | uri %]" alt="B!" /></a></h1> 
- 
-    <div class="entry-content"> 
-      [% text %]
-    </div> 
+</style>
 
+</head>
+<body class="layout-two-column-right">
+<div id="container">
+    <div id="container-inner" class="pkg">
+
+        <div id="banner">
+            <div id="banner-inner" class="pkg">
+                <h1 id="banner-header">[% title %] - [% year %] advent calendar [% name %]</h1>
+                <p id="banner-description">Perl に関するちょっとした Tips をのっけてみるよ。ちゃんと続くかな？</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="pagebody">
+        <div id="pagebody-inner">
+            <div id="alpha">
+                <div id="alpha-inner">
+
+
+<div class="entry">
+    <h1 class="entry-header">[% title %]&nbsp;<a href="http://b.hatena.ne.jp/entry/[% uri_for(req.path_info) %]"><img src="http://b.hatena.ne.jp/entry/image/[% uri_for(req.path_info) %]" alt="B!" /></a></h1><br />
+    <div class="entry-content">
+      [% text %]
+    </div>
+
+    <br />
     <div class="entry-notes">
         [% FOR note IN footnotes %]
         <div class="note" id="fn[% note.number %]">
@@ -62,47 +59,53 @@
         [% END %]
     </div>
 
-    <div class="entry-meta"> 
+    <br />
+    <div class="entry-meta">
+        <a rel="bookmark" href="[% uri_for(req.path_info) %]">[% update_at %]</a>
+        &nbsp;|&nbsp;
+        <a href="[% uri_for(year _ '/' _ name _ '/') %]">Index</a>
+        <br />
 
-        <div style="float:left;margin-right:8px;">
+        <div style="margin-top:12px;margin-bottom:-8px;">
+          <div style="float:left;margin-right:8px;">
             <a href="http://mixi.jp/share.pl"
-               class="mixi-check-button"
-               data-key="6e769313568f4b9fe2270602e5cba4c9d6febd58"
+            class="mixi-check-button"
+            data-key="6e769313568f4b9fe2270602e5cba4c9d6febd58"
             >Check</a>
             <script type="text/javascript" src="http://static.mixi.jp/js/share.js"></script>
-        </div>
+          </div>
 
-        <!-- AddThis Button BEGIN -->
-        <div class="addthis_toolbox addthis_default_style " style="float:left;">
+          <!-- AddThis Button BEGIN -->
+          <div class="addthis_toolbox addthis_default_style " style="float:left;">
             <a class="addthis_button_facebook_like" fb:like:layout="button_count"></a>
             <a class="addthis_button_tweet"></a>
             <a class="addthis_counter addthis_pill_style"></a>
+          </div>
+          <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#username=xa-4cf91af90fd7d613"></script>
+          <!-- AddThis Button END -->
         </div>
-        <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#username=xa-4cf91af90fd7d613"></script>
-        <!-- AddThis Button END -->
         <div style="clear:both;"></div>
 
-        <div id="disqus_thread"></div><script type="text/javascript"><!--
-        var disqus_url='[% req.uri %]';
-        var disqus_title='[% title %]';
-        //--></script> 
-        <script type="text/javascript" src="http://disqus.com/forums/jpac/embed.js"></script> 
-        <noscript><a href="http://jpac.disqus.com/?url=ref">View the discussion thread.</a></noscript> 
-        <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a> 
-        <br />
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+            var disqus_shortname = 'jpac';
+            (function() {
+                var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+                (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+            })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+    </div>
+</div>
 
-        <a rel="bookmark" href="[% req.uri | uri %]">[% update_at %]</a> 
-        &nbsp;|&nbsp;
-        <a href="[% uri_for(year _ '/' _ name _ '/') %]">Index</a> 
-    </div> 
-</div> 
- 
- 
-                </div> 
-            </div> 
-        </div> 
+
+                </div>
+            </div>
+        </div>
         [% INCLUDE 'include/sidemenu.html' %]
-    </div> 
-</div> 
-</body> 
+    </div>
+</div>
+</body>
 </html>
