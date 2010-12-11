@@ -15,8 +15,12 @@ use Date::Format;
 use Text::Xatena;
 use Text::Xatena::Inline;
 use Cache::MemoryCache;
+use Encode qw(encode_utf8 find_encoding);
 
 eval { require File::Spec::Memoized };
+
+my $strftime_encoding = find_encoding($^O eq 'MSWin32' ? 'cp932' : 'utf8')
+    or die 'Oops!';
 
 my %xslate;
 
@@ -315,12 +319,9 @@ sub handler {
                     },
                     format_date => sub {
                         my ( $tp, $args ) = @_;
-                        my $r = $tp->strftime('%Y-%m-%d(%a)');
-                        if ( $^O eq 'MSWin32' ) {
-                            require Encode;
-                            $r = Encode::decode( 'cp932', $r );
-                        }
-                        $r;
+                        return $strftime_encoding->decode(
+                            $tp->strftime('%Y-%m-%d(%a)')
+                        );
                     },
                     html_escape_hex => sub {
                         my ( $str, $args ) = @_;
@@ -331,8 +332,7 @@ sub handler {
             );
         };
         my $content_type = $p->{content_type} || 'text/html';
-        my $body = $tx->render( $p->{tmpl}, $vars );
-        utf8::encode($body);
+        my $body         = encode_utf8( $tx->render( $p->{tmpl}, $vars ) );
         return [
             200,
             [
