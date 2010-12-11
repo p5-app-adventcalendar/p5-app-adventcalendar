@@ -325,8 +325,9 @@ sub handler {
                     },
                     html_escape_hex => sub {
                         my ( $str, $args ) = @_;
-                        $str =~ s/([^A-Za-z0-9\-_.!~*'()@ ])/'&#x'.sprintf('%X', ord($1)).';'/ge;
-                        $str;
+                        $str =~ s{([^A-Za-z0-9\-_.!~*'()@ ])}
+                                 { sprintf('&#x%X;', ord($1)) }ge;
+                        return mark_raw($str);
                     },
                 },
             );
