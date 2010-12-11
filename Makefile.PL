@@ -5,13 +5,13 @@ all_from 'lib/App/AdventCalendar.pm';
 requires 'Plack';
 requires 'Path::Class';
 requires 'Router::Simple';
-requires 'Text::Xslate' => '0.05';
-requires 'Text::Xatena';
-requires 'Time::Piece';
+requires 'Text::Xslate' => '0.3001';
+requires 'Text::Xatena' => '0.08';
+requires 'Time::Piece'  => '1.20';
 requires 'Date::Format';
-requires 'Plack';
+requires 'Cache::MemoryCache';
 
-recommends 'File::Spec::Memoized'; # for performance
+requires 'File::Spec::Memoized'; # for performance
 
 tests 't/*.t';
 author_tests 'xt';
