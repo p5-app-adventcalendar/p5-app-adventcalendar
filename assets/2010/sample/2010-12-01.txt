@@ -13,5 +13,5 @@ use strict;
 say 'hello';
 ||<
 
-You can [http://example.com:title=Link!] and append footnotes((foobar)).
+You can [http://example.com:title=Link!] and append footnotes((foo <em>bar</em>)).
 

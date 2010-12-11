@@ -1,4 +1,5 @@
 package App::AdventCalendar;
+use 5.010_000;
 use strict;
 use warnings;
 use utf8;
@@ -225,11 +226,20 @@ $router->connect(
     }
 );
 
+sub format_text {
+    my($text) = @_;
+    state $xatena = Text::Xatena->new( hatena_compatible => 1 );
+    my $inline    = Text::Xatena::Inline->new;
+
+    return( $xatena->format( $text, inline => $inline ),
+            @{ $inline->footnotes } );
+}
+
 sub parse_entry {
     my $file = shift;
 
-    my $text = $file->slurp( iomode => '<:utf8' );
-    my ( $title, $body ) = split( "\n\n", $text, 2 );
+    my $raw_text = $file->slurp( iomode => '<:utf8' );
+    my ( $title, $body ) = split( "\n\n", $raw_text, 2 );
 
     my ( $tmp, %meta ) = ( '', () );
     for ( split /\n/, $title ) {
@@ -245,13 +255,13 @@ sub parse_entry {
     }
     $title = $tmp;
 
-    my $xatena = Text::Xatena->new( hatena_compatible => 1 );
-    my $inline = Text::Xatena::Inline->new;
-    $text = mark_raw( $xatena->format( $body, inline => $inline ) );
-    my @footnotes = $inline->can('footnotes') ? @{ $inline->footnotes } : ();
+    my($text, @footnotes) = format_text($body);
+    foreach my $note(@footnotes) {
+        $note->{note} = mark_raw($note->{note});
+    }
     return {
         title     => $title,
-        text      => $text,
+        text      => mark_raw($text),
         update_at => time2str('%c', $file->stat->mtime),
         pubdate   => time2str('%a, %d %b %Y %H:%M:%S %z', $file->stat->mtime),
         footnotes => \@footnotes,
