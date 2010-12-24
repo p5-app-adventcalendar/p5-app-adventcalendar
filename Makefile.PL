@@ -10,6 +10,12 @@ requires 'Text::Xatena' => '0.08';
 requires 'Time::Piece'  => '1.20';
 requires 'Date::Format';
 requires 'Cache::MemoryCache';
+requires 'Text::Markdown';
+requires 'Pod::Simple';
+requires 'Plack::Middleware::ReverseProxy';
+requires 'Log::Minimal';
+requires 'Plack::Middleware::Log::Minimal';
+requires 'Pod::Simple::XHTML';
 
 requires 'File::Spec::Memoized'; # for performance
 

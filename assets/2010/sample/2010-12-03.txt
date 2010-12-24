@@ -1,0 +1,12 @@
+this is sample entry title(3)
+meta-format: pod
+
+THIS IS pod.
+
+    PRE PRE PRE
+    PRE PRE PRE
+
+=head1 header
+
+=head2 header(2)
+

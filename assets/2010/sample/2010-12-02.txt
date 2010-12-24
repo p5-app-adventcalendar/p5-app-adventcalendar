@@ -1,0 +1,8 @@
+this is sample entry title(2)
+meta-format: markdown
+
+THIS IS MARKDOWN.
+
+    PRE PRE PRE
+    PRE PRE PRE
+

@@ -15,7 +15,10 @@ use Date::Format;
 use Text::Xatena;
 use Text::Xatena::Inline;
 use Cache::MemoryCache;
+use Text::Markdown ();
 use Encode qw(encode_utf8 find_encoding);
+use Log::Minimal;
+use Pod::Simple::XHTML;
 
 eval { require File::Spec::Memoized };
 
@@ -219,6 +222,7 @@ $router->connect(
             my $file = $root->file( $t->ymd . '.txt' );
 
             if ( -e $file ) {
+                debugf("rendering $file");
                 my $entry = parse_entry($file);
                 $vars->{title}     = $entry->{title};
                 $vars->{text}      = $entry->{text};
@@ -226,6 +230,7 @@ $router->connect(
                 $vars->{footnotes} = $entry->{footnotes};
             }
             else {
+                debugf("file '$file' is not found.");
                 die not_found();
             }
         },
@@ -233,12 +238,31 @@ $router->connect(
 );
 
 sub format_text {
-    my($text) = @_;
-    state $xatena = Text::Xatena->new( hatena_compatible => 1 );
-    my $inline    = Text::Xatena::Inline->new;
+    my($text, $meta) = @_;
 
-    return( $xatena->format( $text, inline => $inline ),
-            @{ $inline->footnotes } );
+    given (lc($meta->{format})) {
+        when ('markdown') {
+            return (Text::Markdown::markdown($text));
+        }
+        when ('html') {
+            return $text;
+        }
+        when ('pod') {
+            my $parser = Pod::Simple::XHTML->new();
+            $parser->output_string(\my $out);
+            $parser->html_header('');
+            $parser->html_footer('');
+            $parser->parse_string_document("=pod\n\n$text");
+            return ($out);
+        }
+        default {
+            state $xatena = Text::Xatena->new( hatena_compatible => 1 );
+            my $inline    = Text::Xatena::Inline->new;
+
+            return( $xatena->format( $text, inline => $inline ),
+                    @{ $inline->footnotes } );
+        }
+    }
 }
 
 sub parse_entry {
@@ -250,7 +274,7 @@ sub parse_entry {
     my ( $tmp, %meta ) = ( '', () );
     for ( split /\n/, $title ) {
         if ($tmp) {
-            my ( $key, $value ) = m{^meta-(\w+):\s*(.+)$};
+            my ( $key, $value ) = m{^meta-(\w+):\s*(.+)\s*$};
             if ($key) {
                 $meta{$key} = $value;
             }
@@ -261,7 +285,7 @@ sub parse_entry {
     }
     $title = $tmp;
 
-    my($text, @footnotes) = format_text($body);
+    my($text, @footnotes) = format_text($body, \%meta);
     foreach my $note(@footnotes) {
         $note->{note} = mark_raw($note->{note});
     }
