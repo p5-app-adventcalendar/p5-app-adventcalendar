@@ -92,6 +92,7 @@ $router->connect(
                     if ( not $cached_title or $mtime > $cached_mtime ) {
                         my $fh = $root->file( $t->ymd . '.txt' )->open;
                         $title = <$fh>;
+                        $title //= '';
                         chomp($title);
                         $cache->set( $t->mday => "$mtime\t$title", 'never' );
                     }
