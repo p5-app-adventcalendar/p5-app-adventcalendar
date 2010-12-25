@@ -22,7 +22,7 @@ builder {
             local $SIG{ALRM} = sub {
                 die "TIMEOUT";
             };
-            my $last = alarm(10);
+            my $last = alarm(20);
             my $ret = $app->(@_);
             alarm $last;
             return $ret;
