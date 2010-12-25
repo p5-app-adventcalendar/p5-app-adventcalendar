@@ -240,7 +240,7 @@ $router->connect(
 sub format_text {
     my($text, $meta) = @_;
 
-    given (lc($meta->{format})) {
+    given (lc($meta->{format} || '')) {
         when ('markdown') {
             return (Text::Markdown::markdown($text));
         }
