@@ -13,7 +13,7 @@ my $conf = do 'config.pl' or
 my $app = sub { App::AdventCalendar::handler($_[0], $conf) };
 
 builder {
-    enable 'Static', path => qr{^/(?:img|css|js)/}, root => "$conf->{assets_path}/htdocs/";
+    enable 'Static', path => qr{^/(?:img|css|js)/}, root => "$conf->{global}->{assets_path}/htdocs/";
     enable 'ReverseProxy';
     enable 'Log::Minimal';
     enable sub {
