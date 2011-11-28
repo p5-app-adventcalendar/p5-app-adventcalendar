@@ -1,0 +1,17 @@
+this is sample entry title
+
+this is sample entry.
+
+you can use "hatena syntax".
+
+- aaaa
+- bbbb
+- cccc
+
+>|perl|
+use strict;
+say 'hello';
+||<
+
+You can [http://example.com:title=Link!] and append footnotes((foo <em>bar</em>)).
+
