@@ -338,7 +338,7 @@ sub handler {
         $vars->{conf}   = $conf;
         $vars->{tracks} = [
             map { $_->dir_list(-1) }
-              grep { $_->is_dir and !$p->{year} ? $_->stringify !~ /tmpl[\\\/]\d/ : 1 }
+              grep { $_->is_dir and !$p->{year} ? $_->stringify !~ /tmpl/ : $_->stringify !~ /tmpl\/\d+/ }
               dir( $conf->{assets_path}, $p->{year} )
               ->children( no_hidden => 1 )
         ];
