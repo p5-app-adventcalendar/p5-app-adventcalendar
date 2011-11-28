@@ -4,22 +4,21 @@ use utf8;
         '2010' => {
             title => 'JPerl Advent Calendar 2010',
             description => 'Perl に関するちょっとした Tips をのっけてみるよ。ちゃんと続くかな？',
-            assets_path => 'assets',
-            base_path => '/articles/advent-calendar',
-            links => [
-                { href => 'http://perl-users.jp/', label => 'perl-users.jp' },
-                { href => 'http://japan.perlassociation.org/', label => 'Japan Perl Association' },
-            ],
         },
         '2011' => {
             title => 'Perl Advent Calendar Japan 2011',
             description => 'Perl に関するちょっとした Tips をのっけてみるよ。ちゃんと続くかな？',
-            assets_path => 'assets',
-            base_path => '/articles/advent-calendar',
-            links => [
-                { href => 'http://perl-users.jp/', label => 'perl-users.jp' },
-                { href => 'http://japan.perlassociation.org/', label => 'Japan Perl Association' },
-            ],
         },
+    },
+
+    'global' => {
+        title => 'Perl Advent Calendar Japan',
+        description => 'Perl に関するちょっとした Tips をのっけてみるよ。ちゃんと続くかな？',
+        assets_path => 'assets',
+        base_path => '/articles/advent-calendar',
+        links => [
+            { href => 'http://perl-users.jp/', label => 'perl-users.jp' },
+            { href => 'http://japan.perlassociation.org/', label => 'Japan Perl Association' },
+        ],
     },
 };
