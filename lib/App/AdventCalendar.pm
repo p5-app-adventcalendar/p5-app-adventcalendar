@@ -301,8 +301,9 @@ sub parse_entry {
 }
 
 sub handler {
-    my ( $env, $conf ) = @_;
+    my ( $env, $global_conf ) = @_;
     if ( my $p = $router->match($env) ) {
+        my $conf = $global_conf->{years}{$p->{year}};
         my $root = dir( $conf->{assets_path}, $p->{year}, $p->{name} );
         return not_found() unless -d $root;
 
