@@ -30,6 +30,27 @@ my %xslate;
 my $router = Router::Simple->new;
 
 $router->connect(
+    '/',
+    {
+        tmpl => 'top.html',
+        act  => sub {
+            my ( $root, $vars ) = @_;
+            my $file = dir( $vars->{conf}->{assets_path} )->file('index.txt');
+            if ( -e $file ) {
+                my $entry = parse_entry($file);
+                $vars->{title}     = $entry->{title};
+                $vars->{text}      = $entry->{text};
+                $vars->{update_at} = $entry->{update_at};
+            }
+            else {
+                die not_found();
+            }
+            $vars->{year} = '';
+            $vars->{name} = '';
+        },
+    }
+);
+$router->connect(
     '/pull',
     {
         tmpl => 'pull.html',
