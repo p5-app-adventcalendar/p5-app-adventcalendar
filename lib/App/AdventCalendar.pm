@@ -384,6 +384,10 @@ sub handler {
                                  { sprintf('&#x%X;', ord($1)) }ge;
                         return mark_raw($str);
                     },
+                    ucfirst => sub {
+                        my $str = shift;
+                        ucfirst $str;
+                    },
                 },
             );
         };
