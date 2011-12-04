@@ -98,7 +98,7 @@ $router->connect(
             my $t = Time::Piece->strptime( "$vars->{year}/12/01", '%Y/%m/%d' );
             my $now = Time::Piece->localtime;
             my $cache =
-              Cache::MemoryCache->new( { namespace => $vars->{name} } );
+              Cache::MemoryCache->new( { namespace => "$vars->{year}/$vars->{name}" } );
             my @entries;
             while ( $t->mday <= 25 ) {
                 my $title;
@@ -179,7 +179,7 @@ $router->connect(
             my $t = Time::Piece->strptime( "$vars->{year}/12/01", '%Y/%m/%d' );
             my $now = Time::Piece->localtime;
             my $cache =
-              Cache::MemoryCache->new( { namespace => $vars->{name} } );
+              Cache::MemoryCache->new( { namespace => "$vars->{year}/$vars->{name}" } );
             my ( @cols, @rows, $i );
 
             @cols = ();
