@@ -340,10 +340,10 @@ sub handler {
         my $vars = { req => $req, %$p };
         $vars->{conf}   = $conf;
         $vars->{tracks} = [
-            map { $_->dir_list(-1) }
+            sort(map { $_->dir_list(-1) }
               grep { $_->is_dir and !$p->{year} ? $_->stringify !~ /(tmpl|htdocs)/ : 1 }
               dir( $conf->{assets_path}, $p->{year} )
-              ->children( no_hidden => 1 )
+              ->children( no_hidden => 1 ))
         ];
 
         eval { $p->{act}->( $root, $vars ) };
