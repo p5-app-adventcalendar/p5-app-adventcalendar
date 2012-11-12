@@ -327,7 +327,10 @@ sub handler {
         my $conf = $global_conf->{global};
         my $root = dir( $conf->{assets_path} );
  
-        if ($p->{year} && $global_conf->{years}{$p->{year}}) {
+        if ($p->{year}) {
+            unless ($global_conf->{years}{$p->{year}}) {
+                return not_found();
+            }
             $conf = +{ %{ $conf }, %{ $global_conf->{years}{$p->{year}} } };
             $root = dir( $conf->{assets_path}, $p->{year}, $p->{name} );
         }
