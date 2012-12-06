@@ -223,7 +223,7 @@ $router->connect(
                   {
                     date   => Time::Piece->new($t),
                     exists => $exists,
-                    title  => Text::VisualWidth::PP::trim(decode_utf8($title), 50),
+                    title  => trim_text(decode_utf8($title), 50),
                   };
                 $t += ONE_DAY;
             }
@@ -286,6 +286,12 @@ sub format_text {
                     @{ $inline->footnotes } );
         }
     }
+}
+
+sub trim_text {
+    my ($text, $width) = @_;
+    my $trim = Text::VisualWidth::PP::trim($text, $width);
+    return $text eq $trim ? $text : "$trim ...";
 }
 
 sub parse_entry {
