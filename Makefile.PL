@@ -16,6 +16,7 @@ requires 'Plack::Middleware::ReverseProxy';
 requires 'Log::Minimal';
 requires 'Plack::Middleware::Log::Minimal';
 requires 'Pod::Simple::XHTML';
+requires 'Text::VisualWidth::PP';
 
 requires 'File::Spec::Memoized'; # for performance
 

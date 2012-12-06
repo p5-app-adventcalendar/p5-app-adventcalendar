@@ -19,6 +19,7 @@ use Text::Markdown ();
 use Encode qw(encode_utf8 find_encoding);
 use Log::Minimal;
 use Pod::Simple::XHTML;
+use Text::VisualWidth::PP;
 
 eval { require File::Spec::Memoized };
 
@@ -222,7 +223,7 @@ $router->connect(
                   {
                     date   => Time::Piece->new($t),
                     exists => $exists,
-                    title  => $title,
+                    title  => Text::VisualWidth::PP::trim($title, 50),
                   };
                 $t += ONE_DAY;
             }
