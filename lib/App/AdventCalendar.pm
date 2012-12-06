@@ -16,7 +16,7 @@ use Text::Xatena;
 use Text::Xatena::Inline;
 use Cache::MemoryCache;
 use Text::Markdown ();
-use Encode qw(encode_utf8 find_encoding);
+use Encode qw(encode_utf8 decode_utf8 find_encoding);
 use Log::Minimal;
 use Pod::Simple::XHTML;
 use Text::VisualWidth::PP;
@@ -223,7 +223,7 @@ $router->connect(
                   {
                     date   => Time::Piece->new($t),
                     exists => $exists,
-                    title  => Text::VisualWidth::PP::trim($title, 50),
+                    title  => Text::VisualWidth::PP::trim(decode_utf8($title), 50),
                   };
                 $t += ONE_DAY;
             }
