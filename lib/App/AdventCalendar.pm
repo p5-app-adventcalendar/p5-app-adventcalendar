@@ -251,6 +251,7 @@ $router->connect(
                 $vars->{text}      = $entry->{text};
                 $vars->{update_at} = $entry->{update_at};
                 $vars->{footnotes} = $entry->{footnotes};
+                $vars->{author}    = $entry->{author} || '';
             }
             else {
                 debugf("file '$file' is not found.");
